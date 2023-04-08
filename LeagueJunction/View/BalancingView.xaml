@@ -17,6 +17,7 @@
                 <TextBlock>
                     <Button Command="{Binding SelectFileCommand}" Content="Select file" Margin="10"/>
                     <Button Command="{Binding GenerateTeamsCommand}" IsEnabled="{Binding IsGenerateTeamsCommandEnabled}" Content="Generate teams" Margin="10"/>
+                    <Button Command="{Binding PostToDiscordCommand}" Content="Post to discord" Margin="10"/>
                 </TextBlock>
             </TabItem>
             <TabItem Header="Teams">
