@@ -13,7 +13,21 @@ namespace LeagueJunction.ViewModel
 {
     public class BalanceVM : ObservableObject
     {
-        private string SelectedFileName { get; set; }
+        public string SelectedFileName { get; set; }
+
+        private string _tempMessage;
+        public string TempMessage 
+        { 
+            get
+            {
+                return _tempMessage;
+            }
+            set
+            {
+                _tempMessage = value;
+                OnPropertyChanged(nameof(TempMessage));
+            }
+        }
 
         public RelayCommand SelectFileCommand { get; private set; }
         public RelayCommand GenerateTeamsCommand { get; private set; }
@@ -41,17 +55,19 @@ namespace LeagueJunction.ViewModel
                 Console.WriteLine(SelectedFileName);
                 IsGenerateTeamsCommandEnabled = true;
                 OnPropertyChanged(nameof(IsGenerateTeamsCommandEnabled));
+                OnPropertyChanged(nameof(SelectedFileName));
             }
 
         }
 
         private void GenerateTeams()
         {
-
+            TempMessage = "Currently an useless button";
         }
 
         private async void PostToDiscord()
         {
+            TempMessage = "Sending message...";
             var resourceManager = new ResourceManager("LeagueJunction.Resources.Tokens", typeof(BalanceVM).Assembly);
             var webhooklink = resourceManager.GetString("dev_webhook");
             var messageid = ulong.Parse(resourceManager.GetString("dev_messageid"));
@@ -60,6 +76,7 @@ namespace LeagueJunction.ViewModel
             {
                 x.Content = $"This is a test message editted with discord.NET\n\nLast edit on: {DateTime.Now} by {Environment.UserName}";
             });
+            TempMessage = "Message posted.";
         }
     }
 }
