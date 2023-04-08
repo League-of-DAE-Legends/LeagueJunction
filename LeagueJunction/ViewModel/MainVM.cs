@@ -10,13 +10,18 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Navigation;
+using LeagueJunction.View;
 
 namespace LeagueJunction.ViewModel
 {
     public class MainVM : ObservableObject
     {
+        // Data
+
+        // Communication with view
         public string WindowTitle { get; private set; }
-        public Color BackgroundColor { get; private set; }
+
+        public BalancingView BalancePage { get; private set; } = new BalancingView();
 
         public RelayCommand OpenGithubReposCommand { get; private set; }
 
@@ -26,6 +31,8 @@ namespace LeagueJunction.ViewModel
 
             OpenGithubReposCommand = new RelayCommand(OpenGithubRepos);
         }
+
+        // Proxy
 
         private void OpenGithubRepos()
         {

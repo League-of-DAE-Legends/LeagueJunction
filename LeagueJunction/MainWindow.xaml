@@ -13,8 +13,7 @@
     <Grid>
         <TabControl >
             <TabItem Header="Balance">
-                <Label Content="Balance page comes here"/>
-                <!--<Frame Content="{Binding BalancePage}" NavigationUIVisibility="Hidden" />-->
+                <Frame Content="{Binding BalancePage}" NavigationUIVisibility="Hidden" />
             </TabItem>
             <TabItem Header="Tournaments">
                 <Label Content="Tournament page comes here"/>
