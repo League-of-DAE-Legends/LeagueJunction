@@ -27,7 +27,7 @@ namespace LeagueJunction.ViewModel
 
         public MainVM()
         {
-            WindowTitle = $"League Junction v0.0.1";
+            WindowTitle = $"League Junction v0.0.2";
 
             OpenGithubReposCommand = new RelayCommand(OpenGithubRepos);
         }
