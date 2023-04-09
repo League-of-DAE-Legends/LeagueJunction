@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord.Webhook;
 using System.Resources;
+using System.Windows;
+using LeagueJunction.View;
 
 namespace LeagueJunction.ViewModel
 {
@@ -32,6 +34,7 @@ namespace LeagueJunction.ViewModel
         public RelayCommand SelectFileCommand { get; private set; }
         public RelayCommand GenerateTeamsCommand { get; private set; }
         public RelayCommand PostToDiscordCommand { get; private set; }
+        public RelayCommand PostToDiscordCallBackCommand { get; private set; }
         public bool IsGenerateTeamsCommandEnabled { get; private set; }
 
         public BalanceVM()
@@ -40,6 +43,7 @@ namespace LeagueJunction.ViewModel
             GenerateTeamsCommand = new RelayCommand(GenerateTeams);
             IsGenerateTeamsCommandEnabled = false;
             PostToDiscordCommand = new RelayCommand(PostToDiscord);
+            PostToDiscordCallBackCommand = new RelayCommand(PostToDiscordCallBack);
         }
 
         // Proxy
@@ -65,17 +69,19 @@ namespace LeagueJunction.ViewModel
             TempMessage = "Currently an useless button";
         }
 
-        private async void PostToDiscord()
+        private void PostToDiscord()
         {
-            TempMessage = "Sending message...";
-            var resourceManager = new ResourceManager("LeagueJunction.Resources.Tokens", typeof(BalanceVM).Assembly);
-            var webhooklink = resourceManager.GetString("dev_webhook");
-            var messageid = ulong.Parse(resourceManager.GetString("dev_messageid"));
-            DiscordWebhookClient webhook = new DiscordWebhookClient(webhooklink);
-            await webhook.ModifyMessageAsync(messageid, x =>
-            {
-                x.Content = $"This is a test message editted with discord.NET\n\nLast edit on: {DateTime.Now} by {Environment.UserName}";
-            });
+            PostToDiscordVM.SetPreviewText($"This is a test message\n\nEditted on {DateTime.Now} by {Environment.UserName}");
+            PostToDiscordVM postToDiscordVM = new PostToDiscordVM();
+            Window postDiscordWindow = new PostToDiscordWindow { DataContext = postToDiscordVM };
+            postToDiscordVM.ThisWindow = postDiscordWindow;
+            postToDiscordVM.CallBackCommand = PostToDiscordCallBackCommand;
+
+            postDiscordWindow.Show();
+        }
+
+        private void PostToDiscordCallBack()
+        {
             TempMessage = "Message posted.";
         }
     }
