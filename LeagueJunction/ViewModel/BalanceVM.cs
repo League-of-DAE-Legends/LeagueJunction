@@ -10,11 +10,17 @@ using Discord.Webhook;
 using System.Resources;
 using System.Windows;
 using LeagueJunction.View;
+using CsvHelper;
+using LeagueJunction.Repository;
 
 namespace LeagueJunction.ViewModel
 {
     public class BalanceVM : ObservableObject
     {
+        // Userdata
+        public List<RawFormsAnswer> RawFormsAnswers { get; set; }
+
+        // Class data
         public string SelectedFileName { get; set; }
 
         private string _tempMessage;
@@ -66,7 +72,18 @@ namespace LeagueJunction.ViewModel
 
         private void GenerateTeams()
         {
-            TempMessage = "Currently an useless button";
+            if (string.IsNullOrEmpty(SelectedFileName))
+            {
+                TempMessage = "No file selected.";
+                return;
+            }
+
+            TempMessage = "Loading...";
+
+            RawFormsAnswers = CsvRegistrationReader.GetRawFormsAnswers(SelectedFileName);
+            OnPropertyChanged(nameof(RawFormsAnswers));
+
+            TempMessage = "Loaded players.";
         }
 
         private void PostToDiscord()

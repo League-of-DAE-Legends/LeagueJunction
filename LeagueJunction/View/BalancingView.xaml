@@ -27,6 +27,15 @@
                     <TextBlock>
                         <Label Content="{Binding TempMessage}"/>
                     </TextBlock>
+                    <TextBlock>
+                        <ListBox ItemsSource="{Binding RawFormsAnswers}" ScrollViewer.VerticalScrollBarVisibility="Visible" MaxHeight="200">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Label Content="{Binding DiscordUsername}"/>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </TextBlock>
                 </StackPanel>
             </TabItem>
             <TabItem Header="Teams">
