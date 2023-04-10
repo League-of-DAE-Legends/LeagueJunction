@@ -39,7 +39,19 @@
                 </StackPanel>
             </TabItem>
             <TabItem Header="Teams">
-                <Label Content="Teams come here"/>
+                <StackPanel>
+                    <Label Content="Teams come here"/>
+                    <TextBlock>
+                    <ListBox ItemsSource="{Binding Teams}" ScrollViewer.VerticalScrollBarVisibility="Visible" MaxHeight="200">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Label Content="{Binding TeamName}"/>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </TextBlock>
+                </StackPanel>
+                
             </TabItem>
         </TabControl>
     </Grid>

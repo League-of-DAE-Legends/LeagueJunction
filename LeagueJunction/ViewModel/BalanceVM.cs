@@ -12,6 +12,7 @@ using System.Windows;
 using LeagueJunction.View;
 using CsvHelper;
 using LeagueJunction.Repository;
+using LeagueJunction.Model;
 
 namespace LeagueJunction.ViewModel
 {
@@ -19,6 +20,9 @@ namespace LeagueJunction.ViewModel
     {
         // Userdata
         public List<RawFormsAnswer> RawFormsAnswers { get; set; }
+
+        // Derivative
+        public List<Team> Teams { get; set; }
 
         // Class data
         public string SelectedFileName { get; set; }
