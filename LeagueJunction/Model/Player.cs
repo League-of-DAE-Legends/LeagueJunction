@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -37,6 +38,12 @@ namespace LeagueJunction.Model
 
     public class Player
     {
+        public Player(string mainUsername, Region region)
+        {
+            MainUsername = mainUsername;
+            Region = region;
+        }
+
         // Essential data
         public string MainUsername { get; set; }
         public Region Region { get; set; } = Region.EUW1;
@@ -58,5 +65,18 @@ namespace LeagueJunction.Model
         // Optional
         public string Contact { get; set; }
         public PreferedRoles PreferedRoles { get; set; }
+
+        // Internal
+        [JsonProperty("id")]
+        public string EncSummonerId { get; set; } // Encrypted summoner id
+        [JsonProperty("rank")]
+        public string Rank { get; set; } // I,II,III,IV
+        [JsonProperty("tier")]
+        public string Tier { get; set; } // SILVER, GOLD
+
+        public uint GetMMR()
+        {
+            return 0;
+        }
     }
 }
