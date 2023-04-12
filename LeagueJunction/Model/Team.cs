@@ -151,8 +151,8 @@ namespace LeagueJunction.Model
                 }
 
                 // Sort from highest rank to lowest rank
-                teams.Reverse();
                 teams.Sort(isT2BetterthanT1);
+                teams.Reverse();
                 foreach (var team in teams)
                 {
                     if (team.NeedsPlayers())
