@@ -10,6 +10,7 @@ using CsvHelper.Configuration;
 using CsvHelper.Configuration.Attributes;
 using LeagueJunction.Model;
 
+
 namespace LeagueJunction.Repository
 {
     public class RawFormsAnswer
@@ -25,6 +26,7 @@ namespace LeagueJunction.Repository
 		[Index(4)]
 		public string PreferredRoles { get; set; }
     }
+
 
     public class CsvRegistrationReader : IPlayerRepository
     {
@@ -54,5 +56,6 @@ namespace LeagueJunction.Repository
 			}
 			return players;
         }
+
     }
 }

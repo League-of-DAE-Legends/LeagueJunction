@@ -27,6 +27,7 @@
                     <TextBlock>
                         <Label Content="{Binding TempMessage}"/>
                     </TextBlock>
+
                     <TextBlock>
                         <ListBox ItemsSource="{Binding RawFormsAnswers}" ScrollViewer.VerticalScrollBarVisibility="Visible" MaxHeight="200">
                             <ListBox.ItemTemplate>
@@ -51,7 +52,7 @@
                         </ListBox>
                     </TextBlock>
                 </StackPanel>
-                
+
             </TabItem>
         </TabControl>
     </Grid>

@@ -15,6 +15,7 @@ using LeagueJunction.Repository;
 using LeagueJunction.Model;
 using System.Diagnostics;
 
+
 namespace LeagueJunction.ViewModel
 {
     public class BalanceVM : ObservableObject
@@ -29,6 +30,7 @@ namespace LeagueJunction.ViewModel
         public List<Team> Teams { get; set; }
 
         // Class data
+
         public string SelectedFileName { get; set; }
 
         private string _tempMessage;
@@ -109,7 +111,6 @@ namespace LeagueJunction.ViewModel
             players.Add(player2);
 
             FillPlayerInfoAsync(players);
-
         }
 
         private void PostToDiscord()
@@ -127,7 +128,7 @@ namespace LeagueJunction.ViewModel
         {
             TempMessage = "Message posted.";
         }
-
+        
         private async void FillPlayerInfoAsync(List<Player> players)
         {
             try
