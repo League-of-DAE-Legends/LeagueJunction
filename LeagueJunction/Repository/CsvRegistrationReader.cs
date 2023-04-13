@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using CsvHelper;
 using CsvHelper.Configuration;
 using CsvHelper.Configuration.Attributes;
+using LeagueJunction.Model;
+
 
 namespace LeagueJunction.Repository
 {
@@ -25,7 +27,8 @@ namespace LeagueJunction.Repository
 		public string PreferredRoles { get; set; }
     }
 
-    public class CsvRegistrationReader
+
+    public class CsvRegistrationReader : IPlayerRepository
     {
         static public List<RawFormsAnswer> GetRawFormsAnswers(string file_path)
         {
@@ -41,5 +44,18 @@ namespace LeagueJunction.Repository
                 return records;
 			}
 		}
+
+        public List<Player> GetPlayers(string sourceFile)
+        {
+			List<Player> players = new List<Player>();
+			var rawAnswers = GetRawFormsAnswers(sourceFile);
+			foreach (var rawAnswer in rawAnswers) 
+			{
+				//var player = new Player();
+                //players.Add(player);
+			}
+			return players;
+        }
+
     }
 }

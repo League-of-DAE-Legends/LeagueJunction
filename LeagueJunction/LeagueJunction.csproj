@@ -130,7 +130,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Model\Player.cs" />
+    <Compile Include="Model\Team.cs" />
     <Compile Include="Model\TranslatedLegacy.cs" />
+
+    <Compile Include="Repository\IPlayerRepository.cs" />
+    <Compile Include="Repository\PlayerAPIRepository.cs" />
+
     <Compile Include="Resources\Tokens.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

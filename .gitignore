@@ -6,6 +6,7 @@
 # Custom added files
 **/Resources/Tokens.resx
 **/Resources/Tokens.Designer.cs
+*.csv
 
 # User-specific files
 *.rsuser

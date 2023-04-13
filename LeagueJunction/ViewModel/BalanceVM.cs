@@ -10,11 +10,27 @@ using Discord.Webhook;
 using System.Resources;
 using System.Windows;
 using LeagueJunction.View;
+using CsvHelper;
+using LeagueJunction.Repository;
+using LeagueJunction.Model;
+using System.Diagnostics;
+
 
 namespace LeagueJunction.ViewModel
 {
     public class BalanceVM : ObservableObject
     {
+        //API Repo
+        PlayerAPIRepository _playerApiRepo = null;
+
+        // Userdata
+        public List<RawFormsAnswer> RawFormsAnswers { get; set; }
+
+        // Derivative
+        public List<Team> Teams { get; set; }
+
+        // Class data
+
         public string SelectedFileName { get; set; }
 
         private string _tempMessage;
@@ -44,6 +60,12 @@ namespace LeagueJunction.ViewModel
             IsGenerateTeamsCommandEnabled = false;
             PostToDiscordCommand = new RelayCommand(PostToDiscord);
             PostToDiscordCallBackCommand = new RelayCommand(PostToDiscordCallBack);
+
+            _playerApiRepo = new PlayerAPIRepository();
+
+            var resourceManager = new ResourceManager("LeagueJunction.Resources.Tokens", typeof(BalanceVM).Assembly);
+            var apiKey = resourceManager.GetString("api_key");
+            _playerApiRepo.ApiKey = apiKey;
         }
 
         // Proxy
@@ -66,7 +88,29 @@ namespace LeagueJunction.ViewModel
 
         private void GenerateTeams()
         {
-            TempMessage = "Currently an useless button";
+            if (string.IsNullOrEmpty(SelectedFileName))
+            {
+                TempMessage = "No file selected.";
+                return;
+            }
+
+            TempMessage = "Loading...";
+
+            RawFormsAnswers = CsvRegistrationReader.GetRawFormsAnswers(SelectedFileName);
+            OnPropertyChanged(nameof(RawFormsAnswers));
+
+            TempMessage = "Loaded players.";
+
+            //API section
+
+            Debug.Assert(false, "Still using temp player list to pull data from API");
+            Player player1 = new Player("TTT Alternative", Region.EUW1);
+            Player player2 = new Player("TTT Wardergrip", Region.EUW1);
+            List<Player> players = new List<Player>();
+            players.Add(player1);
+            players.Add(player2);
+
+            FillPlayerInfoAsync(players);
         }
 
         private void PostToDiscord()
@@ -83,6 +127,18 @@ namespace LeagueJunction.ViewModel
         private void PostToDiscordCallBack()
         {
             TempMessage = "Message posted.";
+        }
+        
+        private async void FillPlayerInfoAsync(List<Player> players)
+        {
+            try
+            {
+                await _playerApiRepo.TryFillPlayerInfoAsync(players);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
     }
 }
