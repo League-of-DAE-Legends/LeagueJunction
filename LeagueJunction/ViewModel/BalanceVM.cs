@@ -116,7 +116,16 @@ namespace LeagueJunction.ViewModel
 
         private void PostToDiscord()
         {
-            PostToDiscordVM.SetPreviewText($"This is a test message\n\nEditted on {DateTime.Now} by {Environment.UserName}");
+            StringBuilder str = new StringBuilder();
+            foreach (var team in Teams) 
+            {
+                if (team != null) 
+                {
+                    str.Append(team.DiscordFormat());
+                    str.Append("\n");
+                }
+            }
+            PostToDiscordVM.SetPreviewText(str.ToString());
             PostToDiscordVM postToDiscordVM = new PostToDiscordVM();
             Window postDiscordWindow = new PostToDiscordWindow { DataContext = postToDiscordVM };
             postToDiscordVM.ThisWindow = postDiscordWindow;
@@ -135,6 +144,8 @@ namespace LeagueJunction.ViewModel
             try
             {
                 await _playerApiRepo.TryFillPlayerInfoAsync(players);
+
+                Teams = Team.SplitIntoTeams(Players);
             }
             catch (Exception ex)
             {
