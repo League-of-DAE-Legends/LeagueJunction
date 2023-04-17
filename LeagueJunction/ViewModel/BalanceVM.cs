@@ -22,6 +22,7 @@ namespace LeagueJunction.ViewModel
     {
         //API Repo
         PlayerAPIRepository _playerApiRepo = null;
+        IPlayerRepository PlayerRepository { get; set; } = new CsvRegistrationReader();
 
         // Userdata
         public List<Player> Players { get; set; }
@@ -96,8 +97,7 @@ namespace LeagueJunction.ViewModel
 
             TempMessage = "Loading...";
             
-            IPlayerRepository playerRepository = new CsvRegistrationReader();
-            Players = playerRepository.GetPlayers(SelectedFileName);
+            Players = PlayerRepository.GetPlayers(SelectedFileName);
             OnPropertyChanged(nameof(Players));
 
             //API section
