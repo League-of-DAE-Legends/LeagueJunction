@@ -85,6 +85,9 @@ namespace LeagueJunction.Model
         public string DiscordFormat(string bulletPoint = "- ", string prefix = "```\n", string suffix = "```\n")
         {
             StringBuilder message = new StringBuilder();
+            message.Append("**__");
+            message.Append(TeamName);
+            message.Append("__**");
             message.Append(prefix);
             foreach (Player player in Players)
             {
@@ -101,7 +104,7 @@ namespace LeagueJunction.Model
             string s = TeamName;
             foreach(Player player in Players) 
             {
-                s += "\n";
+                s += " \n";
                 s += player.Displayname;
             }
             return s;
