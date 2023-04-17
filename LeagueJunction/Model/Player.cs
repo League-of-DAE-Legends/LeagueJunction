@@ -63,6 +63,11 @@ namespace LeagueJunction.Model
             }
         }
 
+        public override string ToString()
+        {
+            return Displayname;
+        }
+
         // Optional
         public string Contact { get; set; }
         public PreferedRoles PreferedRoles { get; set; }
@@ -109,11 +114,11 @@ namespace LeagueJunction.Model
                     {"I", 4}
              };
 
-            var soloRank = rankValues[SoloRank.ToUpper()];
-            var soloTier = tierValues[SoloTier.ToUpper()];
+            var soloRank = string.IsNullOrEmpty(SoloRank) ? rankValues["IV"] : rankValues[SoloRank.ToUpper()];
+            var soloTier = string.IsNullOrEmpty(SoloTier) ? tierValues["SILVER"] : tierValues[SoloTier.ToUpper()];
 
-            var flexRank = rankValues[FlexRank.ToUpper()];
-            var flexTier = tierValues[FlexTier.ToUpper()];
+            var flexRank = string.IsNullOrEmpty(FlexRank) ? rankValues["IV"] : rankValues[FlexRank.ToUpper()];
+            var flexTier = string.IsNullOrEmpty(FlexTier) ? tierValues["SILVER"] : tierValues[FlexTier.ToUpper()];
 
             // MMR = (tierValue - 1) * 4 + rankValue
             //Iron 4 == 1 MMR
@@ -141,7 +146,7 @@ namespace LeagueJunction.Model
             var horizontalOffset = 8; // b in formula
             var verticalOffset = 2.2; // c in formula
             var exponent = 3;
-            _mmr = (uint)Math.Round(amplitude * Math.Pow((_mmr - horizontalOffset), exponent) + verticalOffset);
+            _mmr = (uint)(Math.Round((amplitude * Math.Pow(_mmr - horizontalOffset, exponent) + verticalOffset) * 10000));
 
 
             return _mmr;
