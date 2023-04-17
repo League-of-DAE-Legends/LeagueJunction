@@ -89,6 +89,13 @@ namespace LeagueJunction.Repository
                             invalidIdxs.Add(rawAnswers.FindIndex((r) => r.Equals(rawAnswer)));
 						}
 					}
+
+                    // Optional, don't care if it fails
+                    try
+                    {
+                        player.Contact = rawAnswer.DiscordUsername;
+                    }
+                    catch (Exception e) { }
 				}
                 
                 // Invalid answers
