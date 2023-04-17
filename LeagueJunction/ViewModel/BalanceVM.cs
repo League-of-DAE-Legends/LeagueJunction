@@ -100,8 +100,6 @@ namespace LeagueJunction.ViewModel
             Players = playerRepository.GetPlayers(SelectedFileName);
             OnPropertyChanged(nameof(Players));
 
-            TempMessage = "Loaded players.";
-
             //API section
 
             //Debug.Assert(false, "Still using temp player list to pull data from API");
@@ -146,6 +144,8 @@ namespace LeagueJunction.ViewModel
                 await _playerApiRepo.TryFillPlayerInfoAsync(players);
 
                 Teams = Team.SplitIntoTeams(Players);
+                OnPropertyChanged(nameof(Teams));
+                TempMessage = "League API repos calls complete";
             }
             catch (Exception ex)
             {
