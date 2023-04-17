@@ -24,7 +24,7 @@ namespace LeagueJunction.ViewModel
         PlayerAPIRepository _playerApiRepo = null;
 
         // Userdata
-        public List<RawFormsAnswer> RawFormsAnswers { get; set; }
+        public List<Player> Players { get; set; }
 
         // Derivative
         public List<Team> Teams { get; set; }
@@ -95,22 +95,23 @@ namespace LeagueJunction.ViewModel
             }
 
             TempMessage = "Loading...";
-
-            RawFormsAnswers = CsvRegistrationReader.GetRawFormsAnswers(SelectedFileName);
-            OnPropertyChanged(nameof(RawFormsAnswers));
+            
+            IPlayerRepository playerRepository = new CsvRegistrationReader();
+            Players = playerRepository.GetPlayers(SelectedFileName);
+            OnPropertyChanged(nameof(Players));
 
             TempMessage = "Loaded players.";
 
             //API section
 
-            Debug.Assert(false, "Still using temp player list to pull data from API");
-            Player player1 = new Player("TTT Alternative", Region.EUW1);
-            Player player2 = new Player("TTT Wardergrip", Region.EUW1);
-            List<Player> players = new List<Player>();
-            players.Add(player1);
-            players.Add(player2);
+            //Debug.Assert(false, "Still using temp player list to pull data from API");
+            //Player player1 = new Player("TTT Alternative", Region.EUW1);
+            //Player player2 = new Player("TTT Wardergrip", Region.EUW1);
+            //List<Player> players = new List<Player>();
+            //players.Add(player1);
+            //players.Add(player2);
 
-            FillPlayerInfoAsync(players);
+            FillPlayerInfoAsync(Players);
         }
 
         private void PostToDiscord()

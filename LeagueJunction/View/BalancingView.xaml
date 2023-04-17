@@ -29,10 +29,13 @@
                     </TextBlock>
 
                     <TextBlock>
-                        <ListBox ItemsSource="{Binding RawFormsAnswers}" ScrollViewer.VerticalScrollBarVisibility="Visible" MaxHeight="200">
+                        <ListBox ItemsSource="{Binding Players}" ScrollViewer.VerticalScrollBarVisibility="Visible" MaxHeight="200">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <Label Content="{Binding DiscordUsername}"/>
+                                    <TextBlock>                                        
+                                        <Label Content="{Binding Displayname}" Foreground="Red"/>
+                                        <Label Content="{Binding MainUsername}"/>
+                                    </TextBlock>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>

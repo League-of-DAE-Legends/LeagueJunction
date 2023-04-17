@@ -7,6 +7,7 @@
 **/Resources/Tokens.resx
 **/Resources/Tokens.Designer.cs
 *.csv
+**/csvRegistrationLog.txt
 
 # User-specific files
 *.rsuser

@@ -70,8 +70,7 @@ namespace LeagueJunction.Model
             {
                 if (p != null)
                 {
-                    Debug.Assert(false, "MMR is not implemented yet!");
-                    //mmr += Rank.GetMMR(p.Rank);
+                    mmr += p.GetMMR();
                     count++;
                 }
             }
@@ -129,8 +128,7 @@ namespace LeagueJunction.Model
 
             // Sort from lowest rank to highest rank
 
-            Debug.Assert(false, "MMR is not implemented yet!");
-            //players.Sort((p1, p2) => Rank.GetMMR(p1.Rank).CompareTo(Rank.GetMMR(p2.Rank)));
+            players.Sort((p1, p2) => p1.GetMMR().CompareTo(p2.GetMMR()));
             int backIdx = players.Count - 1;
             int frontIdx = 0;
             bool anyOfTeamsNeedPlayers = true;

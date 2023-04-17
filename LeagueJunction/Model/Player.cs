@@ -130,6 +130,20 @@ namespace LeagueJunction.Model
                 _mmr = soloMMR;
             }
 
+            // Currently _mmr is a value that you could see as what inbetween rank
+            // am I with 0 being the lowest?
+            // Using this, we can fill it in the following formula as x to calculate
+            // mmr based on a graph.
+            // y = a (x-b)³ + c
+
+            // Values are determined with geogebra
+            var amplitude = 0.00134;  // a in formula
+            var horizontalOffset = 8; // b in formula
+            var verticalOffset = 2.2; // c in formula
+            var exponent = 3;
+            _mmr = (uint)Math.Round(amplitude * Math.Pow((_mmr - horizontalOffset), exponent) + verticalOffset);
+
+
             return _mmr;
         }
 

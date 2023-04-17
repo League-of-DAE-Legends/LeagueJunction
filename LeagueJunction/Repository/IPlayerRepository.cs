@@ -9,6 +9,6 @@ namespace LeagueJunction.Repository
 {
     public interface IPlayerRepository
     {
-        List<Player> GetPlayers(string sourceFile);
+        List<Player> GetPlayers(string sourceFile = "");
     }
 }
