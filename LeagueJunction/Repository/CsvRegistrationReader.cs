@@ -95,7 +95,7 @@ namespace LeagueJunction.Repository
                     {
                         player.Contact = rawAnswer.DiscordUsername;
                     }
-                    catch (Exception e) { }
+                    catch (Exception) { }
 				}
                 
                 // Invalid answers
