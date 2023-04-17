@@ -17,3 +17,4 @@ List of used packages and APIs and links to documentation of those APIs to make 
 - [NewtonSoft.JSON](https://www.newtonsoft.com/json/help/html/Introduction.htm)
 - [CommunityToolkit.MVVM](https://learn.microsoft.com/en-us/dotnet/communitytoolkit/mvvm/)
 - [CsvHelper by Josh Close](https://joshclose.github.io/CsvHelper/getting-started/)
+- [Riot API](https://developer.riotgames.com/apis)
