@@ -6,7 +6,7 @@
 # Custom added files
 **/Resources/Tokens.resx
 **/Resources/Tokens.Designer.cs
-*.csv
+**/formsAnswers.csv
 **/csvRegistrationLog.txt
 
 # User-specific files

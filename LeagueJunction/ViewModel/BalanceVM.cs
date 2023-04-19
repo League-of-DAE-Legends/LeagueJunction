@@ -5,15 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using Discord.Webhook;
 using System.Resources;
 using System.Windows;
 using LeagueJunction.View;
-using CsvHelper;
 using LeagueJunction.Repository;
 using LeagueJunction.Model;
-using System.Diagnostics;
 
 
 namespace LeagueJunction.ViewModel
@@ -23,6 +19,7 @@ namespace LeagueJunction.ViewModel
         //API Repo
         PlayerAPIRepository _playerApiRepo = null;
         IPlayerRepository PlayerRepository { get; set; } = new CsvRegistrationReader();
+        ITeamNamesRepository TeamNamesRepository { get; set; } = new CsvTeamNamesRepository("../../Resources/SubFactions.csv");
 
         // Userdata
         public List<Player> Players { get; set; }
@@ -144,12 +141,28 @@ namespace LeagueJunction.ViewModel
                 await _playerApiRepo.TryFillPlayerInfoAsync(players);
 
                 Teams = Team.SplitIntoTeams(Players);
+                RandomiseTeamNames();
                 OnPropertyChanged(nameof(Teams));
                 TempMessage = "League API repos calls complete";
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void RandomiseTeamNames()
+        {
+            if (TeamNamesRepository != null)
+            {
+                foreach (var team in Teams)
+                {
+                    string str = TeamNamesRepository.GetNextTeamName();
+                    if (str != null)
+                    {
+                        team.TeamName = str;
+                    }
+                }
             }
         }
     }
