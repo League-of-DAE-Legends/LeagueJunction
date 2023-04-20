@@ -82,11 +82,16 @@ namespace LeagueJunction.Model
             ++_teamCounter;
             TeamName = $"Team {_teamCounter}";
         }
-        public string DiscordFormat(string bulletPoint = "- ", string prefix = "```\n", string suffix = "```\n")
+        public string DiscordFormat(bool showMmr = false,string bulletPoint = "- ", string prefix = "```\n", string suffix = "```\n")
         {
             StringBuilder message = new StringBuilder();
             message.Append("**__");
             message.Append(TeamName);
+            if (showMmr)
+            {
+                var mmr = AverageMMR();
+                message.Append($" {(mmr.HasValue ? mmr.Value : uint.MaxValue)}");
+            }
             message.Append("__**");
             message.Append(prefix);
             foreach (Player player in Players)
@@ -136,7 +141,23 @@ namespace LeagueJunction.Model
             int frontIdx = 0;
             bool anyOfTeamsNeedPlayers = true;
 
-            Comparison<Team> isT2BetterthanT1 = (t1, t2) => t1.AverageMMR().Value.CompareTo(t2.AverageMMR().Value);
+            Comparison<Team> isT2BetterthanT1 = (t1, t2) =>
+            {
+                var t2AvaMmr = t2.AverageMMR();
+                var t1AvaMmr = t1.AverageMMR();
+                if (t2 == null || t2AvaMmr == null)
+                {
+                    return -1;
+                }
+                else if (t1 == null || t1AvaMmr == null)
+                {
+                    return 1;
+                }
+                else
+                {
+                    return t2AvaMmr.Value.CompareTo(t1AvaMmr.Value);
+                }
+            };
 
             while (anyOfTeamsNeedPlayers)
             {
