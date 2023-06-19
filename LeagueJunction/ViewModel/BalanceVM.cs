@@ -24,6 +24,17 @@ namespace LeagueJunction.ViewModel
         // Userdata
         public List<Player> Players { get; set; }
 
+        private Player _selectedPlayer;
+        public Player SelectedPlayer 
+        { 
+            get { return _selectedPlayer; }
+            set
+            {
+                _selectedPlayer = value;
+                OnPropertyChanged(nameof(SelectedPlayer));
+            }
+        }
+
         // Derivative
         public List<Team> Teams { get; set; }
 
@@ -49,6 +60,7 @@ namespace LeagueJunction.ViewModel
         public RelayCommand GenerateTeamsCommand { get; private set; }
         public RelayCommand PostToDiscordCommand { get; private set; }
         public RelayCommand PostToDiscordCallBackCommand { get; private set; }
+        public RelayCommand SavePlayerCommand { get;private set; }
         public bool IsGenerateTeamsCommandEnabled { get; private set; }
 
         public BalanceVM()
@@ -58,6 +70,7 @@ namespace LeagueJunction.ViewModel
             IsGenerateTeamsCommandEnabled = false;
             PostToDiscordCommand = new RelayCommand(PostToDiscord);
             PostToDiscordCallBackCommand = new RelayCommand(PostToDiscordCallBack);
+            SavePlayerCommand = new RelayCommand(SavePlayer);
 
             _playerApiRepo = new PlayerAPIRepository();
 
@@ -164,6 +177,11 @@ namespace LeagueJunction.ViewModel
                     }
                 }
             }
+        }
+
+        private void SavePlayer()
+        {
+            
         }
     }
 }
