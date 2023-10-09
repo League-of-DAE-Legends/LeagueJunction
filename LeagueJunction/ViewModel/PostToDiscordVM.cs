@@ -34,14 +34,16 @@ namespace LeagueJunction.ViewModel
         public Window ThisWindow { get; set; }
         public RelayCommand CallBackCommand { get; set; }
 
-        public RelayCommand PostToDiscordCommand { get; private set; }
+        public RelayCommand PostToDevDiscordCommand { get; private set; }
+        public RelayCommand PostToPublicDiscordCommand { get; private set; }
 
         public PostToDiscordVM()
         {
-            PostToDiscordCommand = new RelayCommand(PostToDiscord);
+            PostToDevDiscordCommand = new RelayCommand(PostToDevDiscord);
+            PostToPublicDiscordCommand = new RelayCommand(PostToPublicDiscord);
         }
 
-        private async void PostToDiscord()
+        private async void PostToDevDiscord()
         {
             if (PreviewText.Equals("<empty>"))
             {
@@ -51,6 +53,29 @@ namespace LeagueJunction.ViewModel
             var resourceManager = new ResourceManager("LeagueJunction.Resources.Tokens", typeof(BalanceVM).Assembly);
             var webhooklink = resourceManager.GetString("dev_webhook");
             var messageid = ulong.Parse(resourceManager.GetString("dev_messageid"));
+            DiscordWebhookClient webhook = new DiscordWebhookClient(webhooklink);
+            await webhook.ModifyMessageAsync(messageid, x =>
+            {
+                x.Content = PreviewText;
+            });
+
+            if (CallBackCommand != null)
+            {
+                CallBackCommand.Execute(this);
+            }
+            ThisWindow.Close();
+        }
+
+        private async void PostToPublicDiscord()
+        {
+            if (PreviewText.Equals("<empty>"))
+            {
+                return;
+            }
+
+            var resourceManager = new ResourceManager("LeagueJunction.Resources.Tokens", typeof(BalanceVM).Assembly);
+            var webhooklink = resourceManager.GetString("public_webhook");
+            var messageid = ulong.Parse(resourceManager.GetString("public_messageid"));
             DiscordWebhookClient webhook = new DiscordWebhookClient(webhooklink);
             await webhook.ModifyMessageAsync(messageid, x =>
             {

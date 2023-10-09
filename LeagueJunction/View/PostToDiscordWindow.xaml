@@ -15,7 +15,10 @@
             <TextBlock>
                 <TextBlock Text="{Binding PreviewText}"/>
             </TextBlock>
-            <Button Content="Post" Command="{Binding PostToDiscordCommand}" MaxWidth="100"/>
+            <TextBlock HorizontalAlignment="Center">
+                <Button Content="Post PUBLIC" Command="{Binding PostToPublicDiscordCommand}"/>
+                <Button Content="Post DEV" Command="{Binding PostToDevDiscordCommand}"/>
+            </TextBlock>
         </ItemsControl>
     </Grid>
 </Window>
