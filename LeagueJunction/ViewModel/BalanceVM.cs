@@ -157,7 +157,7 @@ namespace LeagueJunction.ViewModel
             }
             finally
             {
-                MessageBox.Show("done");
+                MessageBox.Show("Finished API calls");
             }
         }
 

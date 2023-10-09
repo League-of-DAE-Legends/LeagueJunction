@@ -47,6 +47,8 @@ namespace LeagueJunction.Model
         {
             MainUsername = mainUsername;
             Region = region;
+            SoloRank = "IV";
+            SoloTier = "SILVER";
         }
 
         // Essential data
