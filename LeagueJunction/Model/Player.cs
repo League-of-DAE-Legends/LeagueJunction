@@ -8,12 +8,16 @@ using static LeagueJunction.Model.TranslatedLegacy;
 
 namespace LeagueJunction.Model
 {
+   /// <summary>
+   /// The regions correspond with the regions specified and used by Riot API
+   /// See https://developer.riotgames.com
+   /// </summary>
     public enum Region
     {
         BR1, EUN1, EUW1, JP1, KR, LA1, LA2,
         NA1, OC1, PH2, RU, SG2, TH2, TR1, TW2, VN2
     }
-
+    
     public sealed class PreferedRoles
     {
         public bool Top { get; set; }
@@ -48,9 +52,13 @@ namespace LeagueJunction.Model
         // Essential data
         public string MainUsername { get; set; }
         public Region Region { get; set; } = Region.EUW1;
-
-        // Derivative
+        
         private string _displayName;
+        /// <summary>
+        /// Always use Displayname to get their username.
+        /// This will be filled with their non EUW username if that exists, otherwise with the EUW username.
+        /// The point is to get their main rank which is expected to be higher in their main region.
+        /// </summary>
         public string Displayname 
         { 
             get
@@ -73,6 +81,7 @@ namespace LeagueJunction.Model
         public PreferedRoles PreferedRoles { get; set; }
 
         // Internal
+        // The properties correspond with the properties that we need to read from RIOT API
         [JsonProperty("id")]
         public string EncSummonerId { get; set; } // Encrypted summoner id
         public string SoloRank { get; set; } // I,II,III,IV

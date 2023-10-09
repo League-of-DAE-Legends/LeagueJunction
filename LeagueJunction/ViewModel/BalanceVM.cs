@@ -112,13 +112,6 @@ namespace LeagueJunction.ViewModel
 
             //API section
 
-            //Debug.Assert(false, "Still using temp player list to pull data from API");
-            //Player player1 = new Player("TTT Alternative", Region.EUW1);
-            //Player player2 = new Player("TTT Wardergrip", Region.EUW1);
-            //List<Player> players = new List<Player>();
-            //players.Add(player1);
-            //players.Add(player2);
-
             FillPlayerInfoAsync(Players);
         }
 
@@ -161,6 +154,10 @@ namespace LeagueJunction.ViewModel
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                MessageBox.Show("done");
             }
         }
 
