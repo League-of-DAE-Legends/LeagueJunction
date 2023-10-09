@@ -8,12 +8,16 @@ using static LeagueJunction.Model.TranslatedLegacy;
 
 namespace LeagueJunction.Model
 {
+   /// <summary>
+   /// The regions correspond with the regions specified and used by Riot API
+   /// See https://developer.riotgames.com
+   /// </summary>
     public enum Region
     {
         BR1, EUN1, EUW1, JP1, KR, LA1, LA2,
         NA1, OC1, PH2, RU, SG2, TH2, TR1, TW2, VN2
     }
-
+    
     public sealed class PreferedRoles
     {
         public bool Top { get; set; }
@@ -48,9 +52,13 @@ namespace LeagueJunction.Model
         // Essential data
         public string MainUsername { get; set; }
         public Region Region { get; set; } = Region.EUW1;
-
-        // Derivative
+        
         private string _displayName;
+        /// <summary>
+        /// Always use Displayname to get their username.
+        /// This will be filled with their non EUW username if that exists, otherwise with the EUW username.
+        /// The point is to get their main rank which is expected to be higher in their main region.
+        /// </summary>
         public string Displayname 
         { 
             get
@@ -63,11 +71,17 @@ namespace LeagueJunction.Model
             }
         }
 
+        public override string ToString()
+        {
+            return Displayname;
+        }
+
         // Optional
         public string Contact { get; set; }
         public PreferedRoles PreferedRoles { get; set; }
 
         // Internal
+        // The properties correspond with the properties that we need to read from RIOT API
         [JsonProperty("id")]
         public string EncSummonerId { get; set; } // Encrypted summoner id
         public string SoloRank { get; set; } // I,II,III,IV
@@ -109,11 +123,11 @@ namespace LeagueJunction.Model
                     {"I", 4}
              };
 
-            var soloRank = rankValues[SoloRank.ToUpper()];
-            var soloTier = tierValues[SoloTier.ToUpper()];
+            var soloRank = string.IsNullOrEmpty(SoloRank) ? rankValues["IV"] : rankValues[SoloRank.ToUpper()];
+            var soloTier = string.IsNullOrEmpty(SoloTier) ? tierValues["SILVER"] : tierValues[SoloTier.ToUpper()];
 
-            var flexRank = rankValues[FlexRank.ToUpper()];
-            var flexTier = tierValues[FlexTier.ToUpper()];
+            var flexRank = string.IsNullOrEmpty(FlexRank) ? rankValues["IV"] : rankValues[FlexRank.ToUpper()];
+            var flexTier = string.IsNullOrEmpty(FlexTier) ? tierValues["SILVER"] : tierValues[FlexTier.ToUpper()];
 
             // MMR = (tierValue - 1) * 4 + rankValue
             //Iron 4 == 1 MMR
@@ -129,6 +143,20 @@ namespace LeagueJunction.Model
             {
                 _mmr = soloMMR;
             }
+
+            // Currently _mmr is a value that you could see as what inbetween rank
+            // am I with 0 being the lowest?
+            // Using this, we can fill it in the following formula as x to calculate
+            // mmr based on a graph.
+            // y = a (x-b)³ + c
+
+            // Values are determined with geogebra
+            var amplitude = 0.00134;  // a in formula
+            var horizontalOffset = 8; // b in formula
+            var verticalOffset = 2.2; // c in formula
+            var exponent = 3;
+            _mmr = (uint)(Math.Round((amplitude * Math.Pow(_mmr - horizontalOffset, exponent) + verticalOffset) * 10000));
+
 
             return _mmr;
         }

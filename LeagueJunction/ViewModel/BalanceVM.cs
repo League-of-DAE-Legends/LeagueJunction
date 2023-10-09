@@ -5,15 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using Discord.Webhook;
 using System.Resources;
 using System.Windows;
 using LeagueJunction.View;
-using CsvHelper;
 using LeagueJunction.Repository;
 using LeagueJunction.Model;
-using System.Diagnostics;
 
 
 namespace LeagueJunction.ViewModel
@@ -22,9 +18,22 @@ namespace LeagueJunction.ViewModel
     {
         //API Repo
         PlayerAPIRepository _playerApiRepo = null;
+        IPlayerRepository PlayerRepository { get; set; } = new CsvRegistrationReader();
+        ITeamNamesRepository TeamNamesRepository { get; set; } = new CsvTeamNamesRepository("../../Resources/SubFactions.csv");
 
         // Userdata
-        public List<RawFormsAnswer> RawFormsAnswers { get; set; }
+        public List<Player> Players { get; set; }
+
+        private Player _selectedPlayer;
+        public Player SelectedPlayer 
+        { 
+            get { return _selectedPlayer; }
+            set
+            {
+                _selectedPlayer = value;
+                OnPropertyChanged(nameof(SelectedPlayer));
+            }
+        }
 
         // Derivative
         public List<Team> Teams { get; set; }
@@ -51,6 +60,7 @@ namespace LeagueJunction.ViewModel
         public RelayCommand GenerateTeamsCommand { get; private set; }
         public RelayCommand PostToDiscordCommand { get; private set; }
         public RelayCommand PostToDiscordCallBackCommand { get; private set; }
+        public RelayCommand SavePlayerCommand { get;private set; }
         public bool IsGenerateTeamsCommandEnabled { get; private set; }
 
         public BalanceVM()
@@ -60,6 +70,7 @@ namespace LeagueJunction.ViewModel
             IsGenerateTeamsCommandEnabled = false;
             PostToDiscordCommand = new RelayCommand(PostToDiscord);
             PostToDiscordCallBackCommand = new RelayCommand(PostToDiscordCallBack);
+            SavePlayerCommand = new RelayCommand(SavePlayer);
 
             _playerApiRepo = new PlayerAPIRepository();
 
@@ -95,27 +106,27 @@ namespace LeagueJunction.ViewModel
             }
 
             TempMessage = "Loading...";
-
-            RawFormsAnswers = CsvRegistrationReader.GetRawFormsAnswers(SelectedFileName);
-            OnPropertyChanged(nameof(RawFormsAnswers));
-
-            TempMessage = "Loaded players.";
+            
+            Players = PlayerRepository.GetPlayers(SelectedFileName);
+            OnPropertyChanged(nameof(Players));
 
             //API section
 
-            Debug.Assert(false, "Still using temp player list to pull data from API");
-            Player player1 = new Player("TTT Alternative", Region.EUW1);
-            Player player2 = new Player("TTT Wardergrip", Region.EUW1);
-            List<Player> players = new List<Player>();
-            players.Add(player1);
-            players.Add(player2);
-
-            FillPlayerInfoAsync(players);
+            FillPlayerInfoAsync(Players);
         }
 
         private void PostToDiscord()
         {
-            PostToDiscordVM.SetPreviewText($"This is a test message\n\nEditted on {DateTime.Now} by {Environment.UserName}");
+            StringBuilder str = new StringBuilder();
+            foreach (var team in Teams) 
+            {
+                if (team != null) 
+                {
+                    str.Append(team.DiscordFormat());
+                    str.Append("\n");
+                }
+            }
+            PostToDiscordVM.SetPreviewText(str.ToString());
             PostToDiscordVM postToDiscordVM = new PostToDiscordVM();
             Window postDiscordWindow = new PostToDiscordWindow { DataContext = postToDiscordVM };
             postToDiscordVM.ThisWindow = postDiscordWindow;
@@ -134,11 +145,40 @@ namespace LeagueJunction.ViewModel
             try
             {
                 await _playerApiRepo.TryFillPlayerInfoAsync(players);
+
+                Teams = Team.SplitIntoTeams(Players);
+                RandomiseTeamNames();
+                OnPropertyChanged(nameof(Teams));
+                TempMessage = "League API repos calls complete";
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
+            finally
+            {
+                MessageBox.Show("done");
+            }
+        }
+
+        private void RandomiseTeamNames()
+        {
+            if (TeamNamesRepository != null)
+            {
+                foreach (var team in Teams)
+                {
+                    string str = TeamNamesRepository.GetNextTeamName();
+                    if (str != null)
+                    {
+                        team.TeamName = str;
+                    }
+                }
+            }
+        }
+
+        private void SavePlayer()
+        {
+            
         }
     }
 }

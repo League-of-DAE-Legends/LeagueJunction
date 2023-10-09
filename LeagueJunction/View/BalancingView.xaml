@@ -28,15 +28,49 @@
                         <Label Content="{Binding TempMessage}"/>
                     </TextBlock>
 
-                    <TextBlock>
-                        <ListBox ItemsSource="{Binding RawFormsAnswers}" ScrollViewer.VerticalScrollBarVisibility="Visible" MaxHeight="200">
+                    <StackPanel Orientation="Horizontal">
+                        <ListBox ItemsSource="{Binding Players}" SelectedItem="{Binding SelectedPlayer}" ScrollViewer.VerticalScrollBarVisibility="Visible" MaxHeight="200">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <Label Content="{Binding DiscordUsername}"/>
+                                    <TextBlock>                                        
+                                        <Label Content="{Binding Displayname}" Foreground="Red"/>
+                                        <Label Content="{Binding MainUsername}"/>
+                                    </TextBlock>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
-                    </TextBlock>
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label>Displayname:</Label>
+                                <TextBox Text="{Binding SelectedPlayer.Displayname}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label>Main Username: </Label>
+                                <TextBox Text="{Binding SelectedPlayer.MainUsername}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label>Region:</Label>
+                                <TextBox Text="{Binding SelectedPlayer.Region}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label>Solo Tier:</Label>
+                                <TextBox Text="{Binding SelectedPlayer.SoloTier}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label>Solo Rank:</Label>
+                                <TextBox Text="{Binding SelectedPlayer.SoloRank}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label>Flex Tier:</Label>
+                                <TextBox Text="{Binding SelectedPlayer.FlexTier}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label>Flex Rank:</Label>
+                                <TextBox Text="{Binding SelectedPlayer.FlexRank}"/>
+                            </StackPanel>
+                            <Button Content="Save" Command="{Binding SavePlayerCommand}"/>
+                        </StackPanel>
+                    </StackPanel>
                 </StackPanel>
             </TabItem>
             <TabItem Header="Teams">
