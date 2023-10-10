@@ -12,6 +12,7 @@ namespace LeagueJunction.Model
         // +=============== NON-STATICS ===============+
         // Data
         public int MaxTeamSize { get; set; }
+        
         public List<Player> Players { get; set; } = new List<Player>();
 
         public string TeamName { get; set; }
@@ -124,10 +125,10 @@ namespace LeagueJunction.Model
         // +================ STATICS ================+
 
         private static ushort _teamCounter = 0;
-        public static List<Team> SplitIntoTeams(List<Player> players, int playersPerTeam = 5)
+        public static List<Team> SplitIntoTeams(List<Player> players, bool shouldSort, int playersPerTeam = 5)
         {
             if (players == null) throw new Exception("Players is null!");
-
+            
             if (players.Count % playersPerTeam != 0)
             {
                 throw new unequal_player_divide();
@@ -140,8 +141,39 @@ namespace LeagueJunction.Model
             }
 
             // Sort from lowest rank to highest rank
+            if (shouldSort)
+            {
+                players.Sort((p1, p2) => p1.GetMMR().CompareTo(p2.GetMMR()));
+            }
+            
+            Random random = new Random();
 
-            players.Sort((p1, p2) => p1.GetMMR().CompareTo(p2.GetMMR()));
+            var groupedPlayers = players.GroupBy(p => p.HighestTier);
+            
+            foreach (var group in groupedPlayers)
+            {
+                List<Player> playersInSameTier = group.ToList();
+                
+                //Fisher-Yates shuffle
+                int n = playersInSameTier.Count;
+                while (n > 1)
+                {
+                    n--;
+                    int k = random.Next(n + 1);
+                    
+                    //Swap without temp variable
+                    //https://stackoverflow.com/questions/804706/swap-two-variables-without-using-a-temporary-variable
+                    (playersInSameTier[k], playersInSameTier[n]) = (playersInSameTier[n], playersInSameTier[k]);
+                }
+
+                for (int i = 0; i < playersInSameTier.Count; i++)
+                {
+                    int originalIndex = players.FindIndex(p => p == group.ElementAt(i));
+                    players[originalIndex] = playersInSameTier[i];
+                }
+              
+            }
+            
             int backIdx = players.Count - 1;
             int frontIdx = 0;
             bool anyOfTeamsNeedPlayers = true;

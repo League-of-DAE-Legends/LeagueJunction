@@ -116,6 +116,9 @@
                     </ItemsControl>
                     
                     </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Command="{Binding RegenerateTeamsCommand}" IsEnabled="{Binding IsRegenerateTeamsCommandEnabled}" Content="Regenerate teams" Margin="10"/>
+                    </StackPanel>
                     
                    
                 </StackPanel>

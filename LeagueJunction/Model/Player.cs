@@ -95,6 +95,7 @@ namespace LeagueJunction.Model
         public string FlexTier { get; set; } // SILVER,GOLD
 
         public string FullRankHighest { get; set; }
+        public string HighestTier { get; set; }
         public uint MMR { get; set; }
 
         public uint GetMMR()
@@ -147,11 +148,13 @@ namespace LeagueJunction.Model
             {
                 MMR = flexMMR;
                 FullRankHighest = FlexTier + ' '+ FlexRank;
+                HighestTier = FlexTier;
             }
             else
             {
                 MMR = soloMMR;
                 FullRankHighest = SoloTier +' ' + SoloRank;
+                HighestTier = SoloTier;
             }
 
             // Currently _mmr is a value that you could see as what inbetween rank

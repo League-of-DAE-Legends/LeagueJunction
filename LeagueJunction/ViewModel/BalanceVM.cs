@@ -71,17 +71,22 @@ namespace LeagueJunction.ViewModel
 
         public RelayCommand SelectFileCommand { get; private set; }
         public RelayCommand GenerateTeamsCommand { get; private set; }
+        public RelayCommand RegenerateTeamsCommand { get; private set; }
         public RelayCommand PostToDiscordCommand { get; private set; }
         public RelayCommand PostToDiscordCallBackCommand { get; private set; }
         public RelayCommand SavePlayerCommand { get;private set; }
         public RelayCommand SelectedTeamCommand { get; private set; }
         public bool IsGenerateTeamsCommandEnabled { get; private set; }
+        public bool IsRegenerateTeamsCommandEnabled { get; private set; }
+        private bool _shouldCallAPI = true;
 
         public BalanceVM()
         {
             SelectFileCommand = new RelayCommand(SelectFileDialog);
             GenerateTeamsCommand = new RelayCommand(GenerateTeams);
+            RegenerateTeamsCommand = new RelayCommand(RegenerateTeams);
             IsGenerateTeamsCommandEnabled = false;
+            IsRegenerateTeamsCommandEnabled = false;
             PostToDiscordCommand = new RelayCommand(PostToDiscord);
             PostToDiscordCallBackCommand = new RelayCommand(PostToDiscordCallBack);
             SavePlayerCommand = new RelayCommand(SavePlayer);
@@ -107,6 +112,9 @@ namespace LeagueJunction.ViewModel
                 IsGenerateTeamsCommandEnabled = true;
                 OnPropertyChanged(nameof(IsGenerateTeamsCommandEnabled));
                 OnPropertyChanged(nameof(SelectedFileName));
+                
+                //New file so we should call the API
+                _shouldCallAPI = true;
             }
 
         }
@@ -118,7 +126,12 @@ namespace LeagueJunction.ViewModel
                 TempMessage = "No file selected.";
                 return;
             }
-
+            
+            if (_shouldCallAPI = false)
+            {
+                //No point in doing API calls, we already have all the info
+                return;
+            }
             TempMessage = "Loading...";
             
             Players = PlayerRepository.GetPlayers(SelectedFileName);
@@ -127,6 +140,31 @@ namespace LeagueJunction.ViewModel
             //API section
 
             FillPlayerInfoAsync(Players);
+            _shouldCallAPI = false;
+            
+            IsRegenerateTeamsCommandEnabled = true;
+            OnPropertyChanged(nameof(IsRegenerateTeamsCommandEnabled));
+        }
+
+        private void RegenerateTeams()
+        {
+            if (Teams.Count == 0 || Players.Count % 5 !=0)
+            {
+                MessageBox.Show("Cannot regen sori");
+                return;
+            }
+           
+            
+            IsRegenerateTeamsCommandEnabled = false;
+            OnPropertyChanged(nameof(IsRegenerateTeamsCommandEnabled));
+            
+            Teams = Team.SplitIntoTeams(Players,false);
+            OnPropertyChanged(nameof(Teams));
+            RandomiseTeamNames();
+            
+            IsRegenerateTeamsCommandEnabled = true;
+            OnPropertyChanged(nameof(IsRegenerateTeamsCommandEnabled));
+
         }
 
         private void PostToDiscord()
@@ -159,10 +197,10 @@ namespace LeagueJunction.ViewModel
             try
             {
                 await _playerApiRepo.TryFillPlayerInfoAsync(players);
-
-                Teams = Team.SplitIntoTeams(Players);
+                Teams = Team.SplitIntoTeams(Players,true);
                 RandomiseTeamNames();
                 OnPropertyChanged(nameof(Teams));
+                IsRegenerateTeamsCommandEnabled = true;
                 TempMessage = "League API repos calls complete";
             }
             catch (Exception ex)
