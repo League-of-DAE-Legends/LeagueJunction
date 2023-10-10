@@ -43,6 +43,18 @@ namespace LeagueJunction.ViewModel
 
         public string SelectedFileName { get; set; }
 
+        private Team _selectedTeam;
+        public Team SelectedTeam
+        {
+            get { return _selectedTeam; }
+
+            set
+            {
+                _selectedTeam = value;
+                OnPropertyChanged(nameof(SelectedTeam));
+            }
+        }
+
         private string _tempMessage;
         public string TempMessage 
         { 
@@ -62,6 +74,7 @@ namespace LeagueJunction.ViewModel
         public RelayCommand PostToDiscordCommand { get; private set; }
         public RelayCommand PostToDiscordCallBackCommand { get; private set; }
         public RelayCommand SavePlayerCommand { get;private set; }
+        public RelayCommand SelectedTeamCommand { get; private set; }
         public bool IsGenerateTeamsCommandEnabled { get; private set; }
 
         public BalanceVM()

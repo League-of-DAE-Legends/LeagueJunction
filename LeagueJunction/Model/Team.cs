@@ -16,6 +16,11 @@ namespace LeagueJunction.Model
 
         public string TeamName { get; set; }
 
+        public uint? TeamAverageMMR
+        {
+            get { return AverageMMR(); }
+        }
+
         // Constructor
         public Team(int size = 5)
         {

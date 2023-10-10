@@ -49,6 +49,8 @@ namespace LeagueJunction.Model
             Region = region;
             SoloRank = "IV";
             SoloTier = "SILVER";
+            MMR = 0;
+            FullRankHighest = SoloRank + SoloTier;
         }
 
         // Essential data
@@ -81,6 +83,7 @@ namespace LeagueJunction.Model
         // Optional
         public string Contact { get; set; }
         public PreferedRoles PreferedRoles { get; set; }
+       
 
         // Internal
         // The properties correspond with the properties that we need to read from RIOT API
@@ -90,7 +93,9 @@ namespace LeagueJunction.Model
         public string SoloTier { get; set; } // SILVER, GOLD
         public string FlexRank { get; set; } // I, II , III
         public string FlexTier { get; set; } // SILVER,GOLD
-        private uint _mmr = 0;
+
+        public string FullRankHighest { get; set; }
+        public uint MMR { get; set; }
 
         public uint GetMMR()
         {
@@ -99,9 +104,9 @@ namespace LeagueJunction.Model
                 throw new Exception("Rank info is empty, fill in rank info first");
             }
 
-            if(_mmr != 0)
+            if(MMR != 0)
             {
-                return _mmr;
+                return MMR;
             }
 
             var tierValues = new Dictionary<string, uint>()
@@ -140,11 +145,13 @@ namespace LeagueJunction.Model
 
             if(flexMMR > soloMMR)
             {
-                _mmr = flexMMR;
+                MMR = flexMMR;
+                FullRankHighest = FlexTier + ' '+ FlexRank;
             }
             else
             {
-                _mmr = soloMMR;
+                MMR = soloMMR;
+                FullRankHighest = SoloTier +' ' + SoloRank;
             }
 
             // Currently _mmr is a value that you could see as what inbetween rank
@@ -158,10 +165,10 @@ namespace LeagueJunction.Model
             var horizontalOffset = 8; // b in formula
             var verticalOffset = 2.2; // c in formula
             var exponent = 3;
-            _mmr = (uint)(Math.Round((amplitude * Math.Pow(_mmr - horizontalOffset, exponent) + verticalOffset) * 10000));
+            MMR = (uint)(Math.Round((amplitude * Math.Pow(MMR - horizontalOffset, exponent) + verticalOffset) * 10000));
 
 
-            return _mmr;
+            return MMR;
         }
 
       
