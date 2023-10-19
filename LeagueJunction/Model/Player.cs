@@ -39,6 +39,38 @@ namespace LeagueJunction.Model
             amount += Convert.ToInt32(Support);
             return amount;
         }
+
+        public override string ToString()
+        {
+            string res = String.Empty;
+
+            if (Top == true)
+            {
+                res += " TOP ";
+            }
+
+            if (Jngl == true)
+            {
+                res += " JGL";
+            }
+
+            if (Mid == true)
+            {
+                res += " MID ";
+            }
+
+            if (Adc == true)
+            {
+                res += " ADC ";
+            }
+
+            if (Support == true)
+            {
+                res += " SUPPORT";
+            }
+            
+            return res;
+        }
     }
 
     public class Player
