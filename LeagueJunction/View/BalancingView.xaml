@@ -120,7 +120,7 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                     
-                    </StackPanel>
+                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <ItemsControl ItemsSource="{Binding SelectedTeam.LaneCounts}">
                             <ItemsControl.ItemTemplate>
@@ -134,8 +134,7 @@
                         </ItemsControl>
                         <Button Command="{Binding RegenerateTeamsCommand}" IsEnabled="{Binding IsRegenerateTeamsCommandEnabled}" Content="Regenerate teams" Margin="10"/>
                     </StackPanel>
-                    
-                   
+
                 </StackPanel>
 
             </TabItem>

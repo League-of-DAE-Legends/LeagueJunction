@@ -40,6 +40,38 @@ namespace LeagueJunction.Model
             return amount;
         }
 
+        public bool PlaysTheRole(string role)
+        {
+            if (Fill)
+            {
+                return true;
+            }
+            switch (role)
+            {
+                case "top": case "TOP": case "Top":
+                    return Top;
+                    break;
+                
+                case "mid": case "MID": case "Mid":
+                    return Mid;
+                    break;
+               
+                case "jngl": case "Jngl": case "JNGL":
+                    return Jngl;
+                    break;
+                
+                case "adc": case "Adc": case "ADC":
+                    return Adc;
+                    break;
+                
+                case "Support": case "SUPPORT": case "support":
+                    return Support;
+                    break;
+            }
+
+            return false;
+        }
+
         public override string ToString()
         {
             string res = String.Empty;
