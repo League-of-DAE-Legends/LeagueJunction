@@ -122,6 +122,16 @@
                     
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
+                        <ItemsControl ItemsSource="{Binding SelectedTeam.LaneCounts}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Key}" Margin="5"></TextBlock>
+                                        <TextBlock Text="{Binding Value}" Margin="5"></TextBlock>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                         <Button Command="{Binding RegenerateTeamsCommand}" IsEnabled="{Binding IsRegenerateTeamsCommandEnabled}" Content="Regenerate teams" Margin="10"/>
                     </StackPanel>
                     

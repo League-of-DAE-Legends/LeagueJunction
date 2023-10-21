@@ -44,30 +44,38 @@ namespace LeagueJunction.Model
         {
             string res = String.Empty;
 
-            if (Top == true)
+            if (Fill)
+            {
+                res += "FILL";
+                return res;
+            }
+            
+            if (Top)
             {
                 res += " TOP ";
             }
 
-            if (Jngl == true)
+            if (Jngl)
             {
                 res += " JGL";
             }
 
-            if (Mid == true)
+            if (Mid)
             {
                 res += " MID ";
             }
 
-            if (Adc == true)
+            if (Adc)
             {
                 res += " ADC ";
             }
 
-            if (Support == true)
+            if (Support )
             {
                 res += " SUPPORT";
             }
+
+            
             
             return res;
         }

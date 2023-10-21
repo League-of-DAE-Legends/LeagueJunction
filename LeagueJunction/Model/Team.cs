@@ -21,7 +21,21 @@ namespace LeagueJunction.Model
         {
             get { return AverageMMR(); }
         }
+        
+        Dictionary<string, int> _laneCounts = new Dictionary<string, int>
+        {
+            { "top", 0 },
+            { "mid", 0 },
+            { "jgl", 0 },
+            { "adc", 0 },
+            { "support", 0 },
+        };
 
+        public Dictionary<string, int> LaneCounts
+        {
+            get { return _laneCounts; }
+        }
+        
         // Constructor
         public Team(int size = 5)
         {
@@ -37,6 +51,7 @@ namespace LeagueJunction.Model
         {
             if (Players.Count < MaxTeamSize)
             {
+                UpdateCoveredLanes(p.PreferedRoles);
                 Players.Add(p);
                 return;
             }
@@ -46,6 +61,54 @@ namespace LeagueJunction.Model
                 throw new Exception("Failed to add player to team.");
             }
             Players.Insert(emptyIndex, p);
+            UpdateCoveredLanes(p.PreferedRoles);
+        }
+
+        private void UpdateCoveredLanes(PreferedRoles preferedRoles)
+        {
+            if (preferedRoles.Fill)
+            {
+                _laneCounts["top"]++;
+                _laneCounts["jgl"]++;
+                _laneCounts["mid"]++;
+                _laneCounts["adc"]++;
+                _laneCounts["support"]++;
+                return;
+            }
+            if (preferedRoles.Top)
+            {
+                _laneCounts["top"]++;
+            }
+            if (preferedRoles.Jngl)
+            {
+                _laneCounts["jgl"]++;
+            }
+            if (preferedRoles.Mid)
+            {
+                _laneCounts["mid"]++;
+            }
+            if (preferedRoles.Adc)
+            {
+                _laneCounts["adc"]++;
+            }
+            if (preferedRoles.Support)
+            {
+                _laneCounts["support"]++;
+            }
+            
+        }
+
+        bool AreAllRolesPicked()
+        {
+            foreach (var count in _laneCounts.Values)
+            {
+                if (count==0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public bool NeedsPlayers()
