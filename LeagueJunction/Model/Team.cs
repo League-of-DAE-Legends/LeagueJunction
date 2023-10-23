@@ -17,6 +17,10 @@ namespace LeagueJunction.Model
         public List<Player> Players { get; set; } = new List<Player>();
 
         public string TeamName { get; set; }
+        public enum Algorithm
+        {
+            Greedy, Backtracking
+        }
 
         public uint? TeamAverageMMR
         {
@@ -190,7 +194,7 @@ namespace LeagueJunction.Model
         private static ushort _teamCounter = 0;
         private static Dictionary<int, List<Player>> _playersByAmountRoles;
         private static Dictionary<string, int> _roleCounts;
-        public static List<Team> SplitIntoTeams(List<Player> players, bool shouldSort, int playersPerTeam = 5)
+        public static List<Team> SplitIntoTeams(List<Player> players,Algorithm algorithm, bool shouldSort, int playersPerTeam = 5)
         {
             if (players == null) throw new Exception("Players is null!");
             
@@ -257,6 +261,21 @@ namespace LeagueJunction.Model
                 }
             };
 
+            switch (algorithm)
+            {
+                case Algorithm.Backtracking:
+                    break;
+                case Algorithm.Greedy:
+                    DistributeUsingGreedyAlgorithm(teams,isT2BetterthanT1);
+                    break;
+            }
+
+            _currentRoleIdx = 0;
+            return teams;
+        }
+
+        private static void DistributeUsingGreedyAlgorithm(List<Team> teams, Comparison<Team> isT2BetterthanT1)
+        {
             int backIdx = 0;
             bool anyOfTeamsNeedPlayers = true;
             
@@ -281,11 +300,8 @@ namespace LeagueJunction.Model
                 
                 anyOfTeamsNeedPlayers = teams.Any(t => t.NeedsPlayers());
             }
-
-            _currentRoleIdx = 0;
-            return teams;
         }
-
+        
         private static int _currentRoleIdx = 1;
         private static List<Player> GetSetOfPlayersToDistribute(int amountOfPlayers)
         {

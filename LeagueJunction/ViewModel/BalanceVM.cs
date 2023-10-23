@@ -158,7 +158,7 @@ namespace LeagueJunction.ViewModel
             IsRegenerateTeamsCommandEnabled = false;
             OnPropertyChanged(nameof(IsRegenerateTeamsCommandEnabled));
             
-            Teams = Team.SplitIntoTeams(Players,false);
+            Teams = Team.SplitIntoTeams(Players,Team.Algorithm.Greedy,false);
             OnPropertyChanged(nameof(Teams));
             RandomiseTeamNames();
             
@@ -197,7 +197,7 @@ namespace LeagueJunction.ViewModel
             try
             {
                 await _playerApiRepo.TryFillPlayerInfoAsync(players);
-                Teams = Team.SplitIntoTeams(Players,true);
+                Teams = Team.SplitIntoTeams(Players,Team.Algorithm.Greedy,true);
                 RandomiseTeamNames();
                 OnPropertyChanged(nameof(Teams));
                 IsRegenerateTeamsCommandEnabled = true;
