@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace LeagueJunction.Model
 {
@@ -12,10 +13,34 @@ namespace LeagueJunction.Model
         // +=============== NON-STATICS ===============+
         // Data
         public int MaxTeamSize { get; set; }
+        
         public List<Player> Players { get; set; } = new List<Player>();
 
         public string TeamName { get; set; }
+        public enum Algorithm
+        {
+            Greedy, Backtracking
+        }
 
+        public uint? TeamAverageMMR
+        {
+            get { return AverageMMR(); }
+        }
+        
+        Dictionary<string, int> _laneCounts = new Dictionary<string, int>
+        {
+            { "top", 0 },
+            { "mid", 0 },
+            { "jngl", 0 },
+            { "adc", 0 },
+            { "support", 0 },
+        };
+
+        public Dictionary<string, int> LaneCounts
+        {
+            get { return _laneCounts; }
+        }
+        
         // Constructor
         public Team(int size = 5)
         {
@@ -31,6 +56,7 @@ namespace LeagueJunction.Model
         {
             if (Players.Count < MaxTeamSize)
             {
+                UpdateCoveredLanes(p.PreferedRoles);
                 Players.Add(p);
                 return;
             }
@@ -40,6 +66,54 @@ namespace LeagueJunction.Model
                 throw new Exception("Failed to add player to team.");
             }
             Players.Insert(emptyIndex, p);
+            UpdateCoveredLanes(p.PreferedRoles);
+        }
+
+        private void UpdateCoveredLanes(PreferedRoles preferedRoles)
+        {
+            if (preferedRoles.Fill)
+            {
+                _laneCounts["top"]++;
+                _laneCounts["jngl"]++;
+                _laneCounts["mid"]++;
+                _laneCounts["adc"]++;
+                _laneCounts["support"]++;
+                return;
+            }
+            if (preferedRoles.Top)
+            {
+                _laneCounts["top"]++;
+            }
+            if (preferedRoles.Jngl)
+            {
+                _laneCounts["jngl"]++;
+            }
+            if (preferedRoles.Mid)
+            {
+                _laneCounts["mid"]++;
+            }
+            if (preferedRoles.Adc)
+            {
+                _laneCounts["adc"]++;
+            }
+            if (preferedRoles.Support)
+            {
+                _laneCounts["support"]++;
+            }
+            
+        }
+
+        bool AreAllRolesPicked()
+        {
+            foreach (var count in _laneCounts.Values)
+            {
+                if (count==0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public bool NeedsPlayers()
@@ -117,17 +191,40 @@ namespace LeagueJunction.Model
 
 
         // +================ STATICS ================+
-
         private static ushort _teamCounter = 0;
-        public static List<Team> SplitIntoTeams(List<Player> players, int playersPerTeam = 5)
+        private static Dictionary<int, List<Player>> _playersByAmountRoles;
+        private static Dictionary<string, int> _roleCounts;
+        public static List<Team> SplitIntoTeams(List<Player> players,Algorithm algorithm, bool shouldSort, int playersPerTeam = 5)
         {
             if (players == null) throw new Exception("Players is null!");
-
+            
             if (players.Count % playersPerTeam != 0)
             {
                 throw new unequal_player_divide();
             }
+            
+            //Group players in containers based on how many roles they can play
+            _playersByAmountRoles = new Dictionary<int, List<Player>>();
+            GroupPlayersByAmountPreferredRoles(_playersByAmountRoles,players);
+               
+            
+            _roleCounts = new Dictionary<string, int>
+            {
+                { "top", 0 },
+                { "jngl", 0 },
+                { "mid", 0 },
+                { "adc", 0 },
+                { "support", 0 },
+                { "fill", 0 }
+            };
+            //Count how many of each laners we have
+            CountPreferredRoles(players);
 
+            //Sort based on which roles have the most players (ascending)
+            //Fill is always last 
+            _roleCounts = _roleCounts.OrderBy(x => x.Key.Equals("fill") ? int.MaxValue : x.Value)
+                .ToDictionary(x => x.Key, x => x.Value);
+            
             List<Team> teams = new List<Team>();
             for (int i = 0; i < players.Count / playersPerTeam; i++)
             {
@@ -135,12 +232,17 @@ namespace LeagueJunction.Model
             }
 
             // Sort from lowest rank to highest rank
+            if (shouldSort)
+            {
+                foreach (var playersList in _playersByAmountRoles.Values)
+                {
+                    playersList.Sort((p1,p2) => p1.GetMMR().CompareTo(p2.GetMMR()));
+                }
+                
+            }
 
-            players.Sort((p1, p2) => p1.GetMMR().CompareTo(p2.GetMMR()));
-            int backIdx = players.Count - 1;
-            int frontIdx = 0;
-            bool anyOfTeamsNeedPlayers = true;
-
+            
+            
             Comparison<Team> isT2BetterthanT1 = (t1, t2) =>
             {
                 var t2AvaMmr = t2.AverageMMR();
@@ -159,37 +261,173 @@ namespace LeagueJunction.Model
                 }
             };
 
-            while (anyOfTeamsNeedPlayers)
+            switch (algorithm)
             {
-                // Sort from lowest rank to highest rank
-                teams.Sort(isT2BetterthanT1);
-                foreach (var team in teams)
-                {
-                    if (team.NeedsPlayers())
-                    {
-                        team.AddPlayer(players[backIdx]);
-                        backIdx--;
-                    }
-                }
-
-                // Sort from highest rank to lowest rank
-                teams.Sort(isT2BetterthanT1);
-                teams.Reverse();
-                foreach (var team in teams)
-                {
-                    if (team.NeedsPlayers())
-                    {
-                        team.AddPlayer(players[frontIdx]);
-                        frontIdx++;
-                    }
-                }
-
-                anyOfTeamsNeedPlayers = teams.Any(t => t.NeedsPlayers());
+                case Algorithm.Backtracking:
+                    break;
+                case Algorithm.Greedy:
+                    DistributeUsingGreedyAlgorithm(teams,isT2BetterthanT1);
+                    break;
             }
 
+            _currentRoleIdx = 0;
             return teams;
         }
 
+        private static void DistributeUsingGreedyAlgorithm(List<Team> teams, Comparison<Team> isT2BetterthanT1)
+        {
+            int backIdx = 0;
+            bool anyOfTeamsNeedPlayers = true;
+            
+            while (anyOfTeamsNeedPlayers)
+            {
+                backIdx = teams.Count - 1;
+                // Sort from highest rank to lowest rank
+                teams.Sort(isT2BetterthanT1);
+                teams.Reverse();
+
+                var setOfPlayers = GetSetOfPlayersToDistribute(teams.Count());
+                setOfPlayers.Sort((p1,p2) => p1.GetMMR().CompareTo(p2.GetMMR()));
+                ShufflePlayersInSameTier(setOfPlayers);
+                foreach (var team in teams)
+                {
+                    if (team.NeedsPlayers())
+                    {
+                        team.AddPlayer(setOfPlayers[backIdx]);
+                        backIdx--;
+                    }
+                }
+                
+                anyOfTeamsNeedPlayers = teams.Any(t => t.NeedsPlayers());
+            }
+        }
+        
+        private static int _currentRoleIdx = 1;
+        private static List<Player> GetSetOfPlayersToDistribute(int amountOfPlayers)
+        {
+            List<Player> playersToDistribute = new List<Player>();
+
+            if (_currentRoleIdx >=5)
+            {
+                _currentRoleIdx = 1;
+            }
+            
+            //Get which role we need to look for
+            var roleList = _roleCounts.ToList();
+            var keyValue = roleList[_currentRoleIdx];
+            string key = keyValue.Key;
+            
+            //Make sure next time we are here, we look for the next role
+            ++_currentRoleIdx;
+
+            int currentAddedPlayers = 0;
+            for (int i = 1; i <= 5; i++)
+            {
+                List<Player> playersInCurrentList = _playersByAmountRoles[i];
+                playersInCurrentList.Reverse();
+                //copy of the list because we cannot remove items inside foreach from the original list
+                foreach (var player in playersInCurrentList.ToList())
+                {
+                    if (player.PreferedRoles.PlaysTheRole(key))
+                    {
+                        playersToDistribute.Add(player);
+                        playersInCurrentList.Remove(player);
+                        ++currentAddedPlayers;
+                    }
+
+                    if (currentAddedPlayers >= amountOfPlayers)
+                    {
+                        return playersToDistribute;
+                    }
+                }
+            }
+          
+            
+            return playersToDistribute;
+        }
+        private static void CountPreferredRoles(List<Player> players)
+        {
+            
+            foreach (var player in players)
+            {
+                if (player.PreferedRoles.Fill)
+                {
+                    _roleCounts["fill"]++;
+                    continue;
+                }
+                if (player.PreferedRoles.Top)
+                {
+                    _roleCounts["top"]++;
+                }
+                if (player.PreferedRoles.Jngl)
+                {
+                    _roleCounts["jngl"]++;
+                }
+                if (player.PreferedRoles.Mid)
+                {
+                    _roleCounts["mid"]++;
+                }
+                if (player.PreferedRoles.Adc)
+                {
+                    _roleCounts["adc"]++;
+                }
+                if (player.PreferedRoles.Support)
+                {
+                    _roleCounts["support"]++;
+                }
+               
+            }
+           
+        }
+        private static void  GroupPlayersByAmountPreferredRoles(Dictionary<int, List<Player>> playersGrouped,List<Player> players)
+        {
+            //Initialize Lists for 1 to 5 roles
+            for (int i = 1; i <= 5; ++i)
+            {
+                //Creates 5 lists to sort players that can play 1,2,3 .. fill roles
+                playersGrouped[i] = new List<Player>();
+            }
+
+            //Put each player in their corresponding container
+            foreach (var player in players)
+            {
+                int numberOfRoles = player.PreferedRoles.Amount();
+                if (numberOfRoles >=1 && numberOfRoles <=5)
+                {
+                    playersGrouped[numberOfRoles].Add(player);
+                }
+            }
+        }
+        private static void ShufflePlayersInSameTier(List<Player> players)
+        {
+            Random random = new Random();
+
+            var groupedPlayers = players.GroupBy(p => p.HighestTier);
+            
+            foreach (var group in groupedPlayers)
+            {
+                List<Player> playersInSameTier = group.ToList();
+                
+                //Fisher-Yates shuffle
+                int n = playersInSameTier.Count;
+                while (n > 1)
+                {
+                    n--;
+                    int k= random.Next(n + 1);
+                    
+                    //Swap without temp variable
+                    //https://stackoverflow.com/questions/804706/swap-two-variables-without-using-a-temporary-variable
+                    (playersInSameTier[k], playersInSameTier[n]) = (playersInSameTier[n], playersInSameTier[k]);
+                }
+
+                for (int i = 0; i < playersInSameTier.Count; i++)
+                {
+                    int originalIndex = players.FindIndex(p => p == group.ElementAt(i));
+                    players[originalIndex] = playersInSameTier[i];
+                }
+              
+            }
+        }
         // +================ OTHERS ================+
         // Exception definition
 

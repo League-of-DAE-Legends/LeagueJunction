@@ -72,6 +72,7 @@ namespace LeagueJunction.Repository
                     }
 
                     var player = new Player(username, region);
+                    
 					players.Add(player);
 
                     // Display name
@@ -89,7 +90,10 @@ namespace LeagueJunction.Repository
                             invalidIdxs.Add(rawAnswers.FindIndex((r) => r.Equals(rawAnswer)));
 						}
 					}
-
+					
+					//Preferred role
+					FillPreferredRoles(rawAnswer.PreferredRoles,player);
+					
                     // Optional, don't care if it fails
                     try
                     {
@@ -127,6 +131,40 @@ namespace LeagueJunction.Repository
 			}
         }
 
+
+        private void FillPreferredRoles(string rawAnswer, Player player)
+        {
+	        string[] prefRoles = rawAnswer.Split(';');
+	        player.PreferedRoles = new PreferedRoles();
+	        foreach (var role in prefRoles)
+	        {
+		        if (role.ToUpper().Equals("TOP"))
+		        {
+			        player.PreferedRoles.Top = true;
+		        }
+		        if (role.ToUpper().Equals("JNGL"))
+		        {
+			        player.PreferedRoles.Jngl = true;
+		        }
+		        if (role.ToUpper().Equals("MID"))
+		        {
+			        player.PreferedRoles.Mid = true;
+		        }
+		        if (role.ToUpper().Equals("ADC"))
+		        {
+			        player.PreferedRoles.Adc = true;
+		        }
+		        if (role.ToUpper().Equals("SUPPORT"))
+		        {
+			        player.PreferedRoles.Support = true;
+		        }
+		        if (role.ToUpper().Equals("FILL"))
+		        {
+			        player.PreferedRoles.Fill = true;
+		        }
+	        }
+
+        }
 		private Region? GetRegionCode(string strRegion)
 		{
             Region? region = null;

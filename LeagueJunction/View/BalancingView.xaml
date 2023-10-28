@@ -74,10 +74,15 @@
                 </StackPanel>
             </TabItem>
             <TabItem Header="Teams">
-                <StackPanel>
-                    <Label Content="Teams come here"/>
-                    <TextBlock>
-                    <ListBox ItemsSource="{Binding Teams}" ScrollViewer.VerticalScrollBarVisibility="Visible" MaxHeight="200">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Average Team MMR: " Foreground="Crimson" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding SelectedTeam.TeamAverageMMR}" VerticalAlignment="Center" />
+                    </StackPanel>
+                   
+                    <StackPanel Orientation="Horizontal">
+                         <TextBlock>
+                    <ListBox ItemsSource="{Binding Teams}" SelectedItem="{Binding SelectedTeam}" ScrollViewer.VerticalScrollBarVisibility="Visible" MaxHeight="200">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <Label Content="{Binding TeamName}"/>
@@ -85,6 +90,51 @@
                             </ListBox.ItemTemplate>
                         </ListBox>
                     </TextBlock>
+                    <ItemsControl ItemsSource="{Binding SelectedTeam.Players}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="Labels"></ColumnDefinition>
+                                        <ColumnDefinition Width="150"></ColumnDefinition>
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="Labels"></ColumnDefinition>
+                                        <ColumnDefinition Width="150"></ColumnDefinition>
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="Labels"></ColumnDefinition>
+                                        <ColumnDefinition Width="150"></ColumnDefinition>
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="Labels"></ColumnDefinition>
+                                        <ColumnDefinition Width="150"></ColumnDefinition>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Foreground="Coral">Username: </Label>
+                                    <TextBlock Grid.Column="1" Text="{Binding Displayname}" Margin="0,0,10,0" />
+
+                                    <Label Grid.Column="2" Margin="0,5,0,0" Foreground="Coral">Rank: </Label>
+                                    <TextBlock Grid.Column="3" Text="{Binding FullRankHighest}" Margin="0,5,10,0" />
+
+                                    <Label Grid.Column="4" Margin="0,5,0,0" Foreground="Coral">MMR: </Label>
+                                    <TextBlock Grid.Column="5" Text="{Binding MMR}" Margin="0,5,10,0" />
+                                    
+                                    <Label Grid.Column="6" Margin="0,5,0,0" Foreground="Coral">Position </Label>
+                                    <TextBlock Grid.Column="7" Text="{Binding PreferedRoles}" Margin="0,5,10,0"></TextBlock>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    
+                     </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <ItemsControl ItemsSource="{Binding SelectedTeam.LaneCounts}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Key}" Margin="5"></TextBlock>
+                                        <TextBlock Text="{Binding Value}" Margin="5"></TextBlock>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Button Command="{Binding RegenerateTeamsCommand}" IsEnabled="{Binding IsRegenerateTeamsCommandEnabled}" Content="Regenerate teams" Margin="10"/>
+                    </StackPanel>
+
                 </StackPanel>
 
             </TabItem>
