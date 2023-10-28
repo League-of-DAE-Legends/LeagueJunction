@@ -229,6 +229,8 @@ namespace LeagueJunction.Model
                 HighestTier = SoloTier;
             }
 
+            #region oldMmrCalc
+#if false
             // Currently _mmr is a value that you could see as what inbetween rank
             // am I with 0 being the lowest?
             // Using this, we can fill it in the following formula as x to calculate
@@ -241,9 +243,46 @@ namespace LeagueJunction.Model
             var verticalOffset = 2.2; // c in formula
             var exponent = 3;
             MMR = (uint)(Math.Round((amplitude * Math.Pow(MMR - horizontalOffset, exponent) + verticalOffset) * 10000));
+#endif
+            #endregion
 
-
-            return MMR;
+            // https://www.leagueofgraphs.com/rankings/rank-distribution
+            // First number is rank number, second number is accumilitave of total MMR (10k)
+            var newMMrCalc = new Dictionary<uint, uint>()
+            {
+                {30,10000},
+                {29,98997},
+                {28,98950},
+                {27,98480},
+                {26,98040},
+                {25,97540},
+                {24,96960},
+                {23,95760},
+                {22,94460},
+                {21,92760},
+                {20,89960},
+                {19,83960},
+                {18,81960},
+                {17,78860},
+                {16,74860},
+                {15,67860},
+                {14,65160},
+                {13,61160},
+                {12,56060},
+                {11,48060},
+                {10,45160},
+                {9,40960},
+                {8,35860},
+                {7,28360},
+                {6,24960},
+                {5,20360},
+                {4,15060},
+                {3,7660},
+                {2,4260},
+                {1,1560},
+                {0,460}
+            };
+            return newMMrCalc[MMR];
         }
 
       
