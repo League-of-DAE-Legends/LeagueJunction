@@ -132,7 +132,9 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-                        <Button Command="{Binding RegenerateTeamsCommand}" IsEnabled="{Binding IsRegenerateTeamsCommandEnabled}" Content="Regenerate teams" Margin="10"/>
+                        <StackPanel Orientation="Vertical">
+                        <Button Command="{Binding GenerateSimpleGreedy}" IsEnabled="{Binding IsGenerateSimpleGreedyCommandEnabled}" Content="Generate teams using Simple Greedy Algorithm" Margin="10"/>
+                        </StackPanel>
                     </StackPanel>
 
                 </StackPanel>

@@ -71,22 +71,26 @@ namespace LeagueJunction.ViewModel
 
         public RelayCommand SelectFileCommand { get; private set; }
         public RelayCommand GenerateTeamsCommand { get; private set; }
-        public RelayCommand RegenerateTeamsCommand { get; private set; }
+        public RelayCommand GenerateSimpleGreedy { get; private set; }
+        public RelayCommand GenerateGreedyBestFit { get; private set; }
         public RelayCommand PostToDiscordCommand { get; private set; }
         public RelayCommand PostToDiscordCallBackCommand { get; private set; }
         public RelayCommand SavePlayerCommand { get;private set; }
         public RelayCommand SelectedTeamCommand { get; private set; }
         public bool IsGenerateTeamsCommandEnabled { get; private set; }
-        public bool IsRegenerateTeamsCommandEnabled { get; private set; }
+        public bool IsGenerateSimpleGreedyCommandEnabled { get; private set; }
+        public bool IsGenerateGreedyBestFitCommandEnabled { get; private set; }
         private bool _shouldCallAPI = true;
 
         public BalanceVM()
         {
             SelectFileCommand = new RelayCommand(SelectFileDialog);
             GenerateTeamsCommand = new RelayCommand(GenerateTeams);
-            RegenerateTeamsCommand = new RelayCommand(RegenerateTeams);
+            GenerateSimpleGreedy = new RelayCommand(RegenerateTeamsSimpleGreedy);
+            GenerateGreedyBestFit =  new RelayCommand(RegenerateTeamsGreedyBestFit);
             IsGenerateTeamsCommandEnabled = false;
-            IsRegenerateTeamsCommandEnabled = false;
+            IsGenerateSimpleGreedyCommandEnabled = false;
+            IsGenerateGreedyBestFitCommandEnabled = false;
             PostToDiscordCommand = new RelayCommand(PostToDiscord);
             PostToDiscordCallBackCommand = new RelayCommand(PostToDiscordCallBack);
             SavePlayerCommand = new RelayCommand(SavePlayer);
@@ -142,11 +146,13 @@ namespace LeagueJunction.ViewModel
             FillPlayerInfoAsync(Players);
             _shouldCallAPI = false;
             
-            IsRegenerateTeamsCommandEnabled = true;
-            OnPropertyChanged(nameof(IsRegenerateTeamsCommandEnabled));
+            IsGenerateSimpleGreedyCommandEnabled = true;
+            IsGenerateGreedyBestFitCommandEnabled = true;
+            OnPropertyChanged(nameof(IsGenerateSimpleGreedyCommandEnabled));
+            OnPropertyChanged(nameof(IsGenerateGreedyBestFitCommandEnabled));
         }
 
-        private void RegenerateTeams()
+        private void RegenerateTeamsSimpleGreedy()
         {
             if (Teams.Count == 0 || Players.Count % 5 !=0)
             {
@@ -155,16 +161,43 @@ namespace LeagueJunction.ViewModel
             }
            
             
-            IsRegenerateTeamsCommandEnabled = false;
-            OnPropertyChanged(nameof(IsRegenerateTeamsCommandEnabled));
+            IsGenerateSimpleGreedyCommandEnabled = false;
+            IsGenerateGreedyBestFitCommandEnabled = false;
+            OnPropertyChanged(nameof(IsGenerateSimpleGreedyCommandEnabled));
+            OnPropertyChanged(nameof(IsGenerateGreedyBestFitCommandEnabled));
             
-            Teams = Team.SplitIntoTeams(Players,Team.Algorithm.Greedy,false);
+            Teams = Team.SplitIntoTeams(Players,false);
             OnPropertyChanged(nameof(Teams));
             RandomiseTeamNames();
             
-            IsRegenerateTeamsCommandEnabled = true;
-            OnPropertyChanged(nameof(IsRegenerateTeamsCommandEnabled));
-
+            IsGenerateSimpleGreedyCommandEnabled = true;
+            OnPropertyChanged(nameof(IsGenerateSimpleGreedyCommandEnabled));
+            IsGenerateGreedyBestFitCommandEnabled = true;
+            OnPropertyChanged(nameof(IsGenerateGreedyBestFitCommandEnabled));
+        }
+        
+        private void RegenerateTeamsGreedyBestFit()
+        {
+            if (Teams.Count == 0 || Players.Count % 5 !=0)
+            {
+                MessageBox.Show("Cannot regen sori");
+                return;
+            }
+           
+            
+            IsGenerateSimpleGreedyCommandEnabled = false;
+            IsGenerateGreedyBestFitCommandEnabled = false;
+            OnPropertyChanged(nameof(IsGenerateSimpleGreedyCommandEnabled));
+            OnPropertyChanged(nameof(IsGenerateGreedyBestFitCommandEnabled));
+            
+            Teams = Team.SplitIntoTeams(Players,false);
+            OnPropertyChanged(nameof(Teams));
+            RandomiseTeamNames();
+            
+            IsGenerateSimpleGreedyCommandEnabled = true;
+            OnPropertyChanged(nameof(IsGenerateSimpleGreedyCommandEnabled));
+            IsGenerateGreedyBestFitCommandEnabled = true;
+            OnPropertyChanged(nameof(IsGenerateGreedyBestFitCommandEnabled));
         }
 
         private void PostToDiscord()
@@ -197,10 +230,11 @@ namespace LeagueJunction.ViewModel
             try
             {
                 await _playerApiRepo.TryFillPlayerInfoAsync(players);
-                Teams = Team.SplitIntoTeams(Players,Team.Algorithm.Greedy,true);
+                Teams = Team.SplitIntoTeams(Players,true);
                 RandomiseTeamNames();
                 OnPropertyChanged(nameof(Teams));
-                IsRegenerateTeamsCommandEnabled = true;
+                IsGenerateSimpleGreedyCommandEnabled = true;
+                IsGenerateGreedyBestFitCommandEnabled = true;
                 TempMessage = "League API repos calls complete";
             }
             catch (Exception ex)
