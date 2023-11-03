@@ -50,7 +50,7 @@
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <Label>Region:</Label>
-                                <TextBox Text="{Binding SelectedPlayer.Region}"/>
+                                <TextBox IsReadOnly="True" Text="{Binding SelectedPlayer.Region}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <Label>Solo Tier:</Label>

@@ -350,8 +350,15 @@ namespace LeagueJunction.Model
                         return playersToDistribute;
                     }
                 }
+                
             }
-          
+
+            //Not enough players for this role
+            //TODO When there is not enough players for a role, handle this
+            if (currentAddedPlayers <amountOfPlayers)
+            {
+                MessageBox.Show($"Team Generation will fail, there is not enough players that play {key}. Implement a fix in Team.cs :)");
+            }
             
             return playersToDistribute;
         }
