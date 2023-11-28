@@ -34,9 +34,16 @@ namespace LeagueJunction.Repository
                 {
                     foreach (var player in players)
                     {
-                       parallelTasks.Add(LoadPlayerIDAsync(player,client));
+                        parallelTasks.Add(LoadPuuIdAsync(player,client));
                     }
-
+                    //Wait untill every player's PuuID is loaded
+                    await Task.WhenAll(parallelTasks);
+                    parallelTasks.Clear();
+                    
+                    foreach (var player in players)
+                    {
+                       parallelTasks.Add(LoadEncSummonerIdAsync(player,client));
+                    }
                     //Wait untill every player's encrypted ID is loaded 
                     await Task.WhenAll(parallelTasks);
                     parallelTasks.Clear();
@@ -68,7 +75,8 @@ namespace LeagueJunction.Repository
 
                 try
                 {
-                    await LoadPlayerIDAsync(outPlayer, client);
+                    await LoadPuuIdAsync(outPlayer, client);
+                    await LoadEncSummonerIdAsync(outPlayer, client);
                     await LoadPlayerRankInfoAsync(outPlayer, client);
                 }
                 catch (Exception ex)
@@ -79,15 +87,51 @@ namespace LeagueJunction.Repository
             }
         }
         
-
         /// <summary>
-        /// Makes an API call to Summoner V-4 endpoint and fills in the EncSummonerID property of the player
+        /// Makes an API call to Account V-1 endpoint and fills in the PuuId property of the player
         /// </summary>
-        private async Task LoadPlayerIDAsync(Player outPlayer,HttpClient client)
+        private async Task LoadPuuIdAsync(Player outPlayer, HttpClient client)
         {
-            string region = outPlayer.Region.ToString().ToLower();
-            string endpoint = $"https://{region}.api.riotgames.com/lol/summoner/v4/summoners/by-name/{outPlayer.MainUsername}";
-           
+            string endpoint = $"https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{outPlayer.MainUsername}/{outPlayer.Tag}";
+            
+            try
+            {
+                //Wait untill there is a free thread
+                await _semaphore.WaitAsync();
+
+                //Communicate with the API
+                HttpResponseMessage response = await client.GetAsync(endpoint);
+
+                //Wait untill processing
+                await Task.Delay(_delayBetweenRequestsMs);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    string message = $"Execption thrown from Account-V1 endpoint. Player: {outPlayer.MainUsername}. API Response: {response.ReasonPhrase}";
+                    throw new Exception(message);
+                }
+
+                string json = await response.Content.ReadAsStringAsync();
+                JObject summonerObject = JObject.Parse(json);
+                outPlayer.PuuId = (string)summonerObject["puuid"];
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                //Free the thread 
+                _semaphore.Release();
+            }
+        }
+        
+        /// <summary>
+        /// Makes an API call to Summoner V-4 endpoint and fills in the EncSummonerId property of the player
+        /// </summary>
+        private async Task LoadEncSummonerIdAsync(Player outPlayer,HttpClient client)
+        {
+            string endpoint = $"https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/{outPlayer.PuuId}";
             try
             {
                 //Wait untill there is a free thread
@@ -126,8 +170,7 @@ namespace LeagueJunction.Repository
         /// </summary>
         private async Task LoadPlayerRankInfoAsync(Player outPlayer,HttpClient client)
         {
-            string region = outPlayer.Region.ToString().ToLower();
-            string endpoint = $"https://{region}.api.riotgames.com/lol/league/v4/entries/by-summoner/{outPlayer.EncSummonerId}";
+            string endpoint = $"https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/{outPlayer.EncSummonerId}";
 
             try
             {

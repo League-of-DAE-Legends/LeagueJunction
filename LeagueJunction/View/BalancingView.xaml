@@ -33,7 +33,7 @@
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock>                                        
-                                        <Label Content="{Binding Displayname}" Foreground="Red"/>
+                                        <Label Content="{Binding MainUsername}" Foreground="Red"/>
                                         <Label Content="{Binding MainUsername}"/>
                                     </TextBlock>
                                 </DataTemplate>
@@ -41,16 +41,8 @@
                         </ListBox>
                         <StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <Label>Displayname:</Label>
-                                <TextBox Text="{Binding SelectedPlayer.Displayname}"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
                                 <Label>Main Username: </Label>
                                 <TextBox Text="{Binding SelectedPlayer.MainUsername}"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Label>Region:</Label>
-                                <TextBox IsReadOnly="True" Text="{Binding SelectedPlayer.Region}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <Label>Solo Tier:</Label>
@@ -105,7 +97,7 @@
                                         <ColumnDefinition Width="150"></ColumnDefinition>
                                     </Grid.ColumnDefinitions>
                                     <Label Grid.Column="0" Foreground="Coral">Username: </Label>
-                                    <TextBlock Grid.Column="1" Text="{Binding Displayname}" Margin="0,0,10,0" />
+                                    <TextBlock Grid.Column="1" Text="{Binding MainUsername}" Margin="0,0,10,0" />
 
                                     <Label Grid.Column="2" Margin="0,5,0,0" Foreground="Coral">Rank: </Label>
                                     <TextBlock Grid.Column="3" Text="{Binding FullRankHighest}" Margin="0,5,10,0" />

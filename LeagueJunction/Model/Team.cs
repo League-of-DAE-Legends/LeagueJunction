@@ -185,7 +185,7 @@ namespace LeagueJunction.Model
             foreach (Player player in Players)
             {
                 message.Append(bulletPoint)
-                    .Append(string.IsNullOrEmpty(player.Contact) ? player.Displayname : player.Contact)
+                    .Append(string.IsNullOrEmpty(player.Contact) ? player.MainUsername : player.Contact)
                     .Append("\n");
             }
             message.Append(suffix);
@@ -198,7 +198,7 @@ namespace LeagueJunction.Model
             foreach(Player player in Players) 
             {
                 s += " \n";
-                s += player.Displayname;
+                s += player.MainUsername;
             }
             return s;
         }
@@ -355,9 +355,34 @@ namespace LeagueJunction.Model
 
             //Not enough players for this role
             //TODO When there is not enough players for a role, handle this
-            if (currentAddedPlayers <amountOfPlayers)
+            if(currentAddedPlayers <amountOfPlayers)
             {
-                MessageBox.Show($"Team Generation will fail, there is not enough players that play {key}. Implement a fix in Team.cs :)");
+                int missingPlayersAmount = amountOfPlayers - currentAddedPlayers;
+                int currentMissingPlayers = missingPlayersAmount;
+
+                //when there is not enough players for a specific role, we look to fill the gap with players that can play multiple roles
+                //5 means fill players, so first we look there, then we move down
+                for (int i = 5; i >= 1; --i)
+                {
+                    if (!_playersByAmountRoles.ContainsKey(i)) continue;
+                    if (_playersByAmountRoles[i].Count == 0) continue;
+                    
+                    List<Player> playersInCurrentList = _playersByAmountRoles[i];
+                    playersInCurrentList.Reverse();
+                    
+                    foreach (var player in playersInCurrentList.ToList())
+                    {
+                        MessageBox.Show($"There is not enough players that play {key}. {player.MainUsername} is used as replacement, but doesn't play the role");
+                        playersToDistribute.Add(player);
+                        playersInCurrentList.Remove(player);
+                        --currentMissingPlayers;
+
+                        if (currentMissingPlayers == 0)
+                        {
+                            return playersToDistribute;
+                        }
+                    }
+                }
             }
             
             return playersToDistribute;

@@ -10,16 +10,7 @@ using static LeagueJunction.Model.TranslatedLegacy;
 
 namespace LeagueJunction.Model
 {
-   /// <summary>
-   /// The regions correspond with the regions specified and used by Riot API
-   /// See https://developer.riotgames.com
-   /// </summary>
-    public enum Region
-    {
-        BR1, EUN1, EUW1, JP1, KR, LA1, LA2,
-        NA1, OC1, PH2, RU, SG2, TH2, TR1, TW2, VN2
-    }
-    
+  
     public sealed class PreferedRoles
     {
         public bool Top { get; set; }
@@ -117,10 +108,10 @@ namespace LeagueJunction.Model
 
     public class Player 
     {
-        public Player(string mainUsername, Region region)
+        public Player(string mainUsername, string tag)
         {
             MainUsername = mainUsername;
-            Region = region;
+            Tag = tag;
             SoloRank = "IV";
             SoloTier = "SILVER";
             FlexRank = "IV";
@@ -131,33 +122,13 @@ namespace LeagueJunction.Model
 
         // Essential data
         public string MainUsername { get; set; }
-        public Region Region { get; set; } = Region.EUW1;
-        
-        private string _displayName;
-        /// <summary>
-        /// Always use Displayname to get their username.
-        /// This will be filled with their non EUW username if that exists, otherwise with the EUW username.
-        /// The point is to get their main rank which is expected to be higher in their main region.
-        /// </summary>
-        public string Displayname 
-        { 
-            get
-            {
-                return string.IsNullOrEmpty(_displayName) ? MainUsername : _displayName;
-            }
-            set
-            {
-                _displayName = value;
-            }
-        }
-
+        public string Tag { get; set; }
         
         public override string ToString()
         {
-            return Displayname;
+            return MainUsername;
         }
-
-        // Optional
+        
         public string Contact { get; set; }
         public PreferedRoles PreferedRoles { get; set; }
        
@@ -166,6 +137,8 @@ namespace LeagueJunction.Model
         // The properties correspond with the properties that we need to read from RIOT API
         [JsonProperty("id")]
         public string EncSummonerId { get; set; } // Encrypted summoner id
+        [JsonProperty("puuid")]
+        public string PuuId { get; set; } // Puuid is unique globally
         public string SoloRank { get; set; } // I,II,III,IV
         public string SoloTier { get; set; } // SILVER, GOLD
         public string FlexRank { get; set; } // I, II , III
@@ -179,21 +152,21 @@ namespace LeagueJunction.Model
         {
             if (string.IsNullOrEmpty(SoloRank))
             {
-                MessageBox.Show($"Solo Rank for {_displayName} was empty/null, setting to default IV");
+                MessageBox.Show($"Solo Rank for {MainUsername} was empty/null, setting to default IV");
             }
             
             if (string.IsNullOrEmpty(FlexRank))
             {
-                MessageBox.Show($"Flex Rank for {_displayName} was empty/null, setting to default IV");
+                MessageBox.Show($"Flex Rank for {MainUsername} was empty/null, setting to default IV");
             }
             
             if (string.IsNullOrEmpty(SoloTier))
             {
-                MessageBox.Show($"Solo Tier for {_displayName} was empty/null, setting to default SILVER");
+                MessageBox.Show($"Solo Tier for {MainUsername} was empty/null, setting to default SILVER");
             }
             if (string.IsNullOrEmpty(FlexTier))
             {
-                MessageBox.Show($"Flex Tier for {_displayName} was empty/null, setting to default SILVER");
+                MessageBox.Show($"Flex Tier for {MainUsername} was empty/null, setting to default SILVER");
             }
             
             var tierValues = new Dictionary<string, uint>()
