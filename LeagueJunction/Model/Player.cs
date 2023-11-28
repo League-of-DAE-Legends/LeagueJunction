@@ -1,9 +1,11 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using static LeagueJunction.Model.TranslatedLegacy;
 
 namespace LeagueJunction.Model
@@ -113,7 +115,7 @@ namespace LeagueJunction.Model
         }
     }
 
-    public class Player
+    public class Player 
     {
         public Player(string mainUsername, Region region)
         {
@@ -121,6 +123,8 @@ namespace LeagueJunction.Model
             Region = region;
             SoloRank = "IV";
             SoloTier = "SILVER";
+            FlexRank = "IV";
+            FlexTier = "SILVER";
             MMR = 0;
             FullRankHighest = SoloRank + SoloTier;
         }
@@ -147,6 +151,7 @@ namespace LeagueJunction.Model
             }
         }
 
+        
         public override string ToString()
         {
             return Displayname;
@@ -169,41 +174,50 @@ namespace LeagueJunction.Model
         public string FullRankHighest { get; set; }
         public string HighestTier { get; set; }
         public uint MMR { get; set; }
-
-        public uint GetMMR()
+        
+        private void UpdateMMR()
         {
-            if (SoloRank == string.Empty || SoloTier == string.Empty || FlexRank == string.Empty || FlexTier == string.Empty)
+            if (string.IsNullOrEmpty(SoloRank))
             {
-                throw new Exception("Rank info is empty, fill in rank info first");
+                MessageBox.Show($"Solo Rank for {_displayName} was empty/null, setting to default IV");
             }
-
-            if(MMR != 0)
+            
+            if (string.IsNullOrEmpty(FlexRank))
             {
-                return MMR;
+                MessageBox.Show($"Flex Rank for {_displayName} was empty/null, setting to default IV");
             }
-
+            
+            if (string.IsNullOrEmpty(SoloTier))
+            {
+                MessageBox.Show($"Solo Tier for {_displayName} was empty/null, setting to default SILVER");
+            }
+            if (string.IsNullOrEmpty(FlexTier))
+            {
+                MessageBox.Show($"Flex Tier for {_displayName} was empty/null, setting to default SILVER");
+            }
+            
             var tierValues = new Dictionary<string, uint>()
-             {
-                    {"IRON", 1},
-                    {"BRONZE", 2},
-                    {"SILVER", 3},
-                    {"GOLD", 4},
-                    {"PLATINUM", 5},
-                    {"EMERALD",6},
-                    {"DIAMOND", 7},
-                    {"MASTER", 8},
-                    {"GRANDMASTER", 9},
-                    {"CHALLENGER", 10}
-             };
+            {
+                {"IRON", 1},
+                {"BRONZE", 2},
+                {"SILVER", 3},
+                {"GOLD", 4},
+                {"PLATINUM", 5},
+                {"EMERALD",6},
+                {"DIAMOND", 7},
+                {"MASTER", 8},
+                {"GRANDMASTER", 9},
+                {"CHALLENGER", 10}
+            };
 
             var rankValues = new Dictionary<string, uint>()
-             {
-                    {"IV", 1},
-                    {"III", 2},
-                    {"II", 3},
-                    {"I", 4}
-             };
-
+            {
+                {"IV", 1},
+                {"III", 2},
+                {"II", 3},
+                {"I", 4}
+            };
+            
             var soloRank = string.IsNullOrEmpty(SoloRank) ? rankValues["IV"] : rankValues[SoloRank.ToUpper()];
             var soloTier = string.IsNullOrEmpty(SoloTier) ? tierValues["SILVER"] : tierValues[SoloTier.ToUpper()];
 
@@ -228,7 +242,9 @@ namespace LeagueJunction.Model
                 FullRankHighest = SoloTier +' ' + SoloRank;
                 HighestTier = SoloTier;
             }
-
+            
+            #region oldMmrCalc
+#if false
             // Currently _mmr is a value that you could see as what inbetween rank
             // am I with 0 being the lowest?
             // Using this, we can fill it in the following formula as x to calculate
@@ -241,12 +257,54 @@ namespace LeagueJunction.Model
             var verticalOffset = 2.2; // c in formula
             var exponent = 3;
             MMR = (uint)(Math.Round((amplitude * Math.Pow(MMR - horizontalOffset, exponent) + verticalOffset) * 10000));
-
-
-            return MMR;
+#endif
+            #endregion
+            
         }
-
-      
+        
+        public uint GetMMR()
+        {
+            UpdateMMR();
+            
+            // https://www.leagueofgraphs.com/rankings/rank-distribution
+            // First number is rank number, second number is accumilitave of total MMR (10k)
+            var newMMrCalc = new Dictionary<uint, uint>()
+            {
+                {40,10000},
+                {36,98997},
+                {32,98950},
+                {28,98480},
+                {27,98040},
+                {26,97540},
+                {25,96960},
+                {24,95760},
+                {23,94460},
+                {22,92760},
+                {21,89960},
+                {20,83960},
+                {19,81960},
+                {18,78860},
+                {17,74860},
+                {16,67860},
+                {15,65160},
+                {14,61160},
+                {13,56060},
+                {12,48060},
+                {11,45160},
+                {10,40960},
+                {9,35860},
+                {8,28360},
+                {7,24960},
+                {6,20360},
+                {5,15060},
+                {4,7660},
+                {3,4260},
+                {2,1560},
+                {1,460}
+            };
+            return newMMrCalc[MMR];
+            
+        }
 
     }
 }

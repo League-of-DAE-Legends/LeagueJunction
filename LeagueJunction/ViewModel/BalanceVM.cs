@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,9 +7,12 @@ using System.Linq;
 using System.Text;
 using System.Resources;
 using System.Windows;
+using System.Windows.Forms;
 using LeagueJunction.View;
 using LeagueJunction.Repository;
 using LeagueJunction.Model;
+using MessageBox = System.Windows.MessageBox;
+using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 
 
 namespace LeagueJunction.ViewModel
@@ -33,9 +35,10 @@ namespace LeagueJunction.ViewModel
             {
                 _selectedPlayer = value;
                 OnPropertyChanged(nameof(SelectedPlayer));
+               
             }
         }
-
+        
         // Derivative
         public List<Team> Teams { get; set; }
 
@@ -71,22 +74,23 @@ namespace LeagueJunction.ViewModel
 
         public RelayCommand SelectFileCommand { get; private set; }
         public RelayCommand GenerateTeamsCommand { get; private set; }
-        public RelayCommand RegenerateTeamsCommand { get; private set; }
+        public RelayCommand GenerateSimpleGreedy { get; private set; }
         public RelayCommand PostToDiscordCommand { get; private set; }
         public RelayCommand PostToDiscordCallBackCommand { get; private set; }
         public RelayCommand SavePlayerCommand { get;private set; }
         public RelayCommand SelectedTeamCommand { get; private set; }
         public bool IsGenerateTeamsCommandEnabled { get; private set; }
-        public bool IsRegenerateTeamsCommandEnabled { get; private set; }
+        public bool IsGenerateSimpleGreedyCommandEnabled { get; private set; }
+
         private bool _shouldCallAPI = true;
 
         public BalanceVM()
         {
             SelectFileCommand = new RelayCommand(SelectFileDialog);
             GenerateTeamsCommand = new RelayCommand(GenerateTeams);
-            RegenerateTeamsCommand = new RelayCommand(RegenerateTeams);
+            GenerateSimpleGreedy = new RelayCommand(RegenerateTeamsSimpleGreedy);
             IsGenerateTeamsCommandEnabled = false;
-            IsRegenerateTeamsCommandEnabled = false;
+            IsGenerateSimpleGreedyCommandEnabled = false;
             PostToDiscordCommand = new RelayCommand(PostToDiscord);
             PostToDiscordCallBackCommand = new RelayCommand(PostToDiscordCallBack);
             SavePlayerCommand = new RelayCommand(SavePlayer);
@@ -142,11 +146,12 @@ namespace LeagueJunction.ViewModel
             FillPlayerInfoAsync(Players);
             _shouldCallAPI = false;
             
-            IsRegenerateTeamsCommandEnabled = true;
-            OnPropertyChanged(nameof(IsRegenerateTeamsCommandEnabled));
+            IsGenerateSimpleGreedyCommandEnabled = true;
+            OnPropertyChanged(nameof(IsGenerateSimpleGreedyCommandEnabled));
+
         }
 
-        private void RegenerateTeams()
+        private void RegenerateTeamsSimpleGreedy()
         {
             if (Teams.Count == 0 || Players.Count % 5 !=0)
             {
@@ -155,17 +160,17 @@ namespace LeagueJunction.ViewModel
             }
            
             
-            IsRegenerateTeamsCommandEnabled = false;
-            OnPropertyChanged(nameof(IsRegenerateTeamsCommandEnabled));
+            IsGenerateSimpleGreedyCommandEnabled = false;
+            OnPropertyChanged(nameof(IsGenerateSimpleGreedyCommandEnabled));
             
-            Teams = Team.SplitIntoTeams(Players,Team.Algorithm.Greedy,false);
+            Teams = Team.SplitIntoTeams(Players,false);
             OnPropertyChanged(nameof(Teams));
             RandomiseTeamNames();
             
-            IsRegenerateTeamsCommandEnabled = true;
-            OnPropertyChanged(nameof(IsRegenerateTeamsCommandEnabled));
-
+            IsGenerateSimpleGreedyCommandEnabled = true;
+            OnPropertyChanged(nameof(IsGenerateSimpleGreedyCommandEnabled));
         }
+        
 
         private void PostToDiscord()
         {
@@ -197,10 +202,10 @@ namespace LeagueJunction.ViewModel
             try
             {
                 await _playerApiRepo.TryFillPlayerInfoAsync(players);
-                Teams = Team.SplitIntoTeams(Players,Team.Algorithm.Greedy,true);
+                Teams = Team.SplitIntoTeams(Players,true);
                 RandomiseTeamNames();
                 OnPropertyChanged(nameof(Teams));
-                IsRegenerateTeamsCommandEnabled = true;
+                IsGenerateSimpleGreedyCommandEnabled = true;
                 TempMessage = "League API repos calls complete";
             }
             catch (Exception ex)
@@ -230,7 +235,79 @@ namespace LeagueJunction.ViewModel
 
         private void SavePlayer()
         {
+            if (!HasRankAndTier(_selectedPlayer)) return;
+            if (!IsNewTierValid(_selectedPlayer.FlexTier)) return;
+            if (!IsNewTierValid(_selectedPlayer.SoloTier)) return;
+            if (!IsNewRankValid(_selectedPlayer.FlexRank,_selectedPlayer.FlexTier)) return;
+            if (!IsNewRankValid(_selectedPlayer.SoloRank,_selectedPlayer.SoloTier)) return;
+           
             
+            RegenerateTeamsSimpleGreedy();
+
+        }
+
+        private bool IsNewTierValid(string tier)
+        {
+            string[] validTiers = { "IRON", "BRONZE", "SILVER", "GOLD", "PLATINUM", "EMERALD", "DIAMOND", "MASTER", "GRANDMASTER", "CHALLENGER" };
+
+            // Convert the input tier to title case to handle cases like "iRoN"
+            if (tier != null)
+            {
+                tier = tier.ToUpper();
+                if (!validTiers.Contains(tier))
+                {
+                    MessageBox.Show("Wrong tier name, choose a value between IRON and CHALLENGER");
+                    return false;
+                }
+            }
+           
+            return true;
+        }
+        private bool IsNewRankValid(string rank, string tier)
+        {
+            if (rank != null)
+            {
+                rank = rank.ToUpper();
+                if (!IsValidRomanNumber(rank))
+                {
+                    MessageBox.Show("Ranks are supposed to be in Roman Number Format (I, II, III, IV)");
+                    return false;
+                }
+
+                tier = tier.ToUpper();
+                if (tier.Equals("MASTER") || tier.Equals("GRANDMASTER") || tier.Equals("CHALLENGER"))
+                {
+                    if (rank != "I")
+                    {
+                        MessageBox.Show($"{tier} can only have I as Rank");
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+        
+        private bool IsValidRomanNumber(string input)
+        {
+            return input == "I" || input == "II" || input == "III" || input == "IV";
+        }
+
+        private bool HasRankAndTier(Player player)
+        {
+           
+            if (!string.IsNullOrEmpty(player.FlexRank) && !string.IsNullOrEmpty(player.FlexTier))
+            {
+                return true;
+            }
+
+            if (!string.IsNullOrEmpty(player.SoloRank) || !string.IsNullOrEmpty(player.SoloTier))
+            {
+                return true;
+            }
+
+            MessageBox.Show("Each player should have a full Flex or Solo rank");
+            return false;
         }
     }
 }

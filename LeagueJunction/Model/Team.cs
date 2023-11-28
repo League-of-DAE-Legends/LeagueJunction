@@ -17,11 +17,7 @@ namespace LeagueJunction.Model
         public List<Player> Players { get; set; } = new List<Player>();
 
         public string TeamName { get; set; }
-        public enum Algorithm
-        {
-            Greedy, Backtracking
-        }
-
+        
         public uint? TeamAverageMMR
         {
             get { return AverageMMR(); }
@@ -132,6 +128,24 @@ namespace LeagueJunction.Model
             return false;
         }
 
+        public uint? TotalMMR()
+        {
+            if (Players.All(item => item == null))
+            {
+                return null;
+            }
+            uint mmr = 0;
+            
+            foreach (Player p in Players)
+            {
+                if (p != null)
+                {
+                    mmr += p.GetMMR();
+
+                }
+            }
+            return mmr;
+        }
         public uint? AverageMMR()
         {
             if (Players.All(item => item == null))
@@ -194,7 +208,8 @@ namespace LeagueJunction.Model
         private static ushort _teamCounter = 0;
         private static Dictionary<int, List<Player>> _playersByAmountRoles;
         private static Dictionary<string, int> _roleCounts;
-        public static List<Team> SplitIntoTeams(List<Player> players,Algorithm algorithm, bool shouldSort, int playersPerTeam = 5)
+        private static long _teamTargetMMR = 0;
+        public static List<Team> SplitIntoTeams(List<Player> players , bool shouldSort, int playersPerTeam = 5)
         {
             if (players == null) throw new Exception("Players is null!");
             
@@ -202,6 +217,8 @@ namespace LeagueJunction.Model
             {
                 throw new unequal_player_divide();
             }
+
+            
             
             //Group players in containers based on how many roles they can play
             _playersByAmountRoles = new Dictionary<int, List<Player>>();
@@ -231,6 +248,8 @@ namespace LeagueJunction.Model
                 teams.Add(new Team(playersPerTeam));
             }
 
+            _teamTargetMMR = players.Sum(player => player.GetMMR()) / teams.Count;
+            
             // Sort from lowest rank to highest rank
             if (shouldSort)
             {
@@ -260,21 +279,12 @@ namespace LeagueJunction.Model
                     return t2AvaMmr.Value.CompareTo(t1AvaMmr.Value);
                 }
             };
-
-            switch (algorithm)
-            {
-                case Algorithm.Backtracking:
-                    break;
-                case Algorithm.Greedy:
-                    DistributeUsingGreedyAlgorithm(teams,isT2BetterthanT1);
-                    break;
-            }
-
-            _currentRoleIdx = 0;
+            DistributeSimpleGreedy(teams,isT2BetterthanT1);
+            
             return teams;
         }
-
-        private static void DistributeUsingGreedyAlgorithm(List<Team> teams, Comparison<Team> isT2BetterthanT1)
+        
+        private static void DistributeSimpleGreedy(List<Team> teams, Comparison<Team> isT2BetterthanT1)
         {
             int backIdx = 0;
             bool anyOfTeamsNeedPlayers = true;
@@ -302,14 +312,14 @@ namespace LeagueJunction.Model
             }
         }
         
-        private static int _currentRoleIdx = 1;
+        private static int _currentRoleIdx = 0;
         private static List<Player> GetSetOfPlayersToDistribute(int amountOfPlayers)
         {
             List<Player> playersToDistribute = new List<Player>();
 
             if (_currentRoleIdx >=5)
             {
-                _currentRoleIdx = 1;
+                _currentRoleIdx = 0;
             }
             
             //Get which role we need to look for
@@ -340,8 +350,15 @@ namespace LeagueJunction.Model
                         return playersToDistribute;
                     }
                 }
+                
             }
-          
+
+            //Not enough players for this role
+            //TODO When there is not enough players for a role, handle this
+            if (currentAddedPlayers <amountOfPlayers)
+            {
+                MessageBox.Show($"Team Generation will fail, there is not enough players that play {key}. Implement a fix in Team.cs :)");
+            }
             
             return playersToDistribute;
         }
@@ -396,6 +413,11 @@ namespace LeagueJunction.Model
                 {
                     playersGrouped[numberOfRoles].Add(player);
                 }
+            }
+
+            foreach (var playersList in playersGrouped.Values)
+            {
+                playersList.Sort((p1,p2) => p1.GetMMR().CompareTo(p2.GetMMR()));
             }
         }
         private static void ShufflePlayersInSameTier(List<Player> players)
